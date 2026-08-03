@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>شهاداتي - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="student-dashboard.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Cinzel:wght@700&family=Alex+Brush&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* --- روح التطبيق الأصلي ومراعاة الـ Safe Area --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; }
+
+        /* --- تأثير Glassmorphism (شفافية وضبابية وبدون حواف) للواجهة الأساسية --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .dashboard-sidebar, .cert-card, .empty-state {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+        }
+
+        /* --- حل مشكلة التداخل: عتامة أعلى للقوائم المنسدلة والإشعارات --- */
+        .user-dropdown, .notification-dropdown {
+            background: rgba(255, 255, 255, 0.95) !important; 
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+        }
+        
+        /* --- تنسيقات القائمة المنسدلة للمستخدم --- */
+        .user-header-profile { position: relative; display: flex; align-items: center; gap: 20px; }
+        #user-menu-btn { cursor: pointer; }
+        #user-menu-btn img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color); padding: 2px; background-color: white; transition: 0.2s; }
+        #user-menu-btn img:active { transform: scale(0.95); }
+        .user-dropdown { display: none; position: absolute; top: 60px; left: 0; z-index: 1000; flex-direction: column; }
+        .user-dropdown.active { display: flex; animation: fadeIn 0.2s ease; }
+        .user-dropdown a { padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; font-family: 'Tajawal'; font-size: 14px; display: flex; gap: 10px; align-items: center; font-weight: 600; }
+        .user-dropdown a:hover { background-color: rgba(255,255,255,0.6); color: var(--primary-color); }
+        .user-dropdown i { width: 15px; text-align: center; color: var(--text-light); }
+        .user-dropdown a:hover i { color: var(--primary-color); }
+        .user-dropdown .logout-link { color: #e74c3c; }
+        .user-dropdown .logout-link i { color: #e74c3c; }
+        .user-dropdown .logout-link:hover { background-color: #fdf2f2; color: #e74c3c; }
+
+        .empty-state { text-align: center; padding: 40px; grid-column: 1 / -1; }
+        .empty-state i { font-size: 50px; color: rgba(0,0,0,0.2); margin-bottom: 15px; }
+        .empty-state h3 { margin-bottom: 10px; }
+
+        /* --- تنسيقات نظام الإشعارات --- */
+        .notification-bell { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .notification-bell i { font-size: 22px; color: #555; }
+        .notification-dropdown {
+            position: absolute; top: 50px; left: -10px; width: 320px;
+            display: none; z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+        .notification-dropdown.active { display: block; }
+        .notif-header { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); background: #ffffff; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .notif-header span { font-size: 14px; }
+        .notif-count-label { background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .notif-list { max-height: 350px; overflow-y: auto; }
+        .notif-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: flex-start; gap: 12px; transition: 0.2s; background: transparent;}
+        .notif-item:hover { background: #f9fafb; }
+        .notif-item.unread { background-color: #f0f9ff; }
+        .notif-icon-box { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+        .type-info { background: #e0f2fe; color: #0284c7; }
+        .type-success { background: #dcfce7; color: #16a34a; }
+        .type-warning { background: #fef9c3; color: #ca8a04; }
+        .type-alert { background: #fee2e2; color: #dc2626; }
+        .notif-content h5 { margin: 0 0 5px; font-size: 14px; color: #333; }
+        .notif-content p { margin: 0 0 5px; font-size: 12px; color: #555; line-height: 1.4; }
+        .notif-time { font-size: 10px; color: #777; }
+        .badge { display: none; position: absolute; top: -5px; right: -8px; background: #e74c3c; color: white; border-radius: 50%; padding: 2px 5px; font-size: 10px; font-weight: bold; border: 2px solid white; } 
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- تنسيقات الشهادات --- */
+        .certificates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
+        .cert-card { display: flex; flex-direction: column; align-items: center; padding: 25px; transition: 0.3s; }
+        .cert-card:hover { transform: translateY(-3px); }
+        .cert-icon { font-size: 50px; color: #F59E0B; margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .cert-course-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 10px; line-height: 1.4; text-align: center; }
+        .cert-date { font-size: 13px; color: #555; margin-bottom: 20px; }
+        .cert-actions { display: flex; gap: 10px; width: 100%; }
+        .cert-actions button { flex: 1; padding: 10px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 12px; }
+
+        .cert-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .cert-modal-content {
+            background: rgba(255, 255, 255, 0.95); width: 95%; max-width: 900px; max-height: 90vh;
+            border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .cert-modal-header { padding: 15px 20px; background: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        
+        .cert-modal-body { 
+            padding: 20px; overflow-y: auto; overflow-x: hidden; 
+            display: flex; justify-content: center; align-items: center; background: #eef2f3; 
+        }
+        
+        /* غلاف العرض للحفاظ على الأبعاد ومنع الشاشة من تدمير التصميم */
+        .cert-scale-wrapper {
+            display: flex; justify-content: center; align-items: center;
+            width: 100%;
+            transition: transform 0.1s;
+        }
+
+        .cert-modal-footer { padding: 15px 20px; background: white; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: flex-end; gap: 10px; }
+        .close-modal { background: none; border: none; font-size: 28px; cursor: pointer; color: #555; transition: 0.2s; }
+        .close-modal:hover { color: #e74c3c; }
+
+        /* تصميم قالب الشهادة - إجبار المتصفح على الاحتفاظ بالأبعاد (min-width/min-height) */
+        .certificate-template {
+            width: 1122px !important; height: 793px !important; min-width: 1122px !important; min-height: 793px !important; 
+            background: #fff; position: relative; box-sizing: border-box; 
+            border: 20px solid #1a202c; padding: 40px; font-family: 'Cairo', sans-serif; 
+            color: #1a202c; overflow: hidden; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .cert-bg-pattern { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; pointer-events: none; background-image: radial-gradient(#6D28D9 2px, transparent 2px); background-size: 30px 30px; }
+        .cert-inner-border { position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; border: 2px solid #D4AF37; z-index: 1; }
+        .cert-content-wrapper { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .cert-logo { font-family: 'Cinzel', serif; font-size: 40px; color: #6D28D9; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; }
+        .cert-title { font-family: 'Amiri', serif; font-size: 60px; color: #D4AF37; margin-bottom: 30px; }
+        .cert-text { font-size: 24px; color: #4a5568; margin-bottom: 20px; }
+        .cert-student-name { font-family: 'Alex Brush', cursive, 'Cairo', sans-serif; font-size: 55px; color: #1a202c; font-weight: bold; margin-bottom: 30px; border-bottom: 2px solid #D4AF37; padding-bottom: 10px; min-width: 400px; display: inline-block; }
+        .cert-course-name { font-size: 32px; color: #6D28D9; font-weight: bold; margin-bottom: 50px; max-width: 800px; line-height: 1.4; }
+        .cert-footer { display: flex; justify-content: space-between; width: 80%; margin-top: auto; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .cert-signature { text-align: center; }
+        
+        .cert-seal { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); color: #D4AF37; font-size: 100px; opacity: 0.2; z-index: 0; }
+
+        @media (max-width: 992px) {
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .mobile-menu-toggle { display: none !important; }
+            .notification-bell { position: static; }
+            .notification-dropdown {
+                position: fixed !important; top: 75px !important; left: 5% !important;
+                width: 90% !important; max-width: none !important; transform: none !important;
+                box-shadow: 0 10px 100px rgba(0,0,0,0.3) !important; z-index: 99999 !important;
+            }
+            .notif-list { max-height: 50vh; }
+            .main-footer { display: none; } 
+            
+            /* تعديل العرض على الموبايل ليتناسب مع الغلاف (Wrapper) وتجنب العصر والتشوه */
+            .cert-modal-body {
+                align-items: flex-start;
+                padding-top: 30px;
+            }
+            .cert-scale-wrapper {
+                transform: scale(0.3);
+                transform-origin: top center;
+                height: 240px; /* 793px * 0.3 */
+            }
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="courses.html">تصفح المكتبة</a>
+                <a href="student-dashboard.html" class="active">لوحة التحكم</a>
+            </nav>
+            
+            <div class="user-header-profile" id="user-header-profile">
+                
+                <div class="notification-bell" id="bell-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge" id="notif-badge" style="display: none;">0</span>
+                    
+                    <div class="notification-dropdown" id="notif-dropdown">
+                        <div class="notif-header">
+                            <span>الإشعارات</span>
+                            <span class="notif-count-label" id="dropdown-count">0 جديد</span>
+                        </div>
+                        <div class="notif-list" id="notif-list">
+                            <p style="text-align:center; padding:20px; color:#999; font-size:12px;">جاري التحميل...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-info-trigger" id="user-menu-btn">
+                    <img src="https://via.placeholder.com/150" alt="User" id="header-profile-img">
+                </div>
+                
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="student-dashboard.html"><i class="fas fa-user"></i> الملف الشخصي</a>
+                    <a href="profile-settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+                    <hr style="margin: 0; border: 0; border-top: 1px solid rgba(0,0,0,0.05);">
+                    <a href="#" id="logout-btn" class="logout-link"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                </div>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" style="display: none;"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-layout">
+                
+                <aside class="dashboard-sidebar">
+                    <div class="user-sidebar-info">
+                        <img src="https://via.placeholder.com/150" alt="User" id="sidebar-profile-img">
+                        <h3 id="sidebar-user-name">...</h3>
+                        <p>طالب مجتهد</p>
+                    </div>
+                    <nav class="sidebar-menu">
+                        <a href="student-dashboard.html"><i class="fas fa-book-open"></i> مكتبتي</a>
+                        <a href="my-certificates.html" class="active"><i class="fas fa-certificate"></i> شهاداتي</a>
+                        <a href="profile-settings.html"><i class="fas fa-cog"></i> إعدادات الحساب</a>
+                    </nav>
+                </aside>
+
+                <main class="dashboard-main">
+                    <h2 class="section-title-small"><i class="fas fa-award" style="color:var(--primary-color);"></i> شهادات الإتمام</h2>
+                    <p style="color:#555; margin-bottom:20px; font-weight:500;">هنا تجد جميع الشهادات التي حصلت عليها بعد إتمام موادك بنجاح.</p>
+                    
+                    <div class="certificates-grid" id="certificates-grid">
+                        <!-- تم إضافة غلاف Flexbox لضمان التوسيط التام في جميع الشاشات -->
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; grid-column: 1 / -1; padding: 40px 0;">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color); margin-bottom: 15px;"></i>
+                            <p style="color: #666; font-weight: bold; margin: 0; text-align: center;">جاري تحميل الشهادات...</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <div class="cert-modal" id="cert-modal">
+        <div class="cert-modal-content">
+            <div class="cert-modal-header">
+                <h3 style="margin:0; font-size:18px;">معاينة الشهادة</h3>
+                <button class="close-modal" onclick="closeCertModal()">&times;</button>
+            </div>
+            
+            <div class="cert-modal-body" id="cert-preview-container">
+                <div class="cert-scale-wrapper" id="cert-wrapper">
+                    <div class="certificate-template" id="certificate-node">
+                        <div class="cert-bg-pattern"></div>
+                        <div class="cert-inner-border"></div>
+                        <i class="fas fa-award cert-seal"></i>
+                        
+                        <div class="cert-content-wrapper">
+                            <div class="cert-logo">SIDRA ACADEMY</div>
+                            <div class="cert-title">شهادة إتمام</div>
+                            <div class="cert-text">يُشهد أن الطالب / الطالبة</div>
+                            
+                            <div class="cert-student-name" id="cert-student-name-display">اسم الطالب</div>
+                            
+                            <div class="cert-text">قد اجتاز بنجاح المادة التعليمية بعنوان</div>
+                            <div class="cert-course-name" id="cert-course-name-display">اسم المادة</div>
+                            
+                            <div class="cert-footer">
+                                <div class="cert-signature">
+                                    <p style="color:#777; font-size:14px; margin-bottom: 5px;">التاريخ</p>
+                                    <p id="cert-date-display" style="font-size: 18px; font-weight: bold; color: #4a5568;">2026/12/31</p>
+                                </div>
+                                <div class="cert-signature">
+                                    <p style="color:#777; font-size:14px; margin-bottom: 5px;">توقيع الإدارة</p>
+                                    <!-- توقيع بخط فري هاند بدل الصورة -->
+                                    <div style="font-family: 'Alex Brush', cursive, sans-serif; font-size: 45px; color: #1a202c; transform: rotate(-5deg); display: inline-block;">Sidra Academy</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cert-modal-footer">
+                <button class="btn btn-secondary" onclick="downloadImage(event)"><i class="fas fa-image"></i> حفظ كصورة</button>
+                <button class="btn btn-primary" onclick="downloadPDF(event)"><i class="fas fa-file-pdf"></i> تحميل PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="student-dashboard.html" class="nav-item active" id="bottom-nav-auth-link">
+            <i class="fas fa-user-circle"></i>
+            <span id="bottom-nav-auth-text">لوحتي</span>
+        </a>
+    </nav>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // ================================================================
+      // طبقة REST بديلة عن Firestore SDK مع دعم الـ Auth Token
+      // ================================================================
+      const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+
+      function toFirestoreValue(v) {
+          if (v === null || v === undefined) return { nullValue: null };
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+          if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+          if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+          return { stringValue: String(v) };
+      }
+
+      async function getRestHeaders() {
+          const headers = { 'Content-Type': 'application/json' };
+          if (auth.currentUser) {
+              try {
+                  const token = await auth.currentUser.getIdToken();
+                  if (token) {
+                      headers['Authorization'] = `Bearer ${token}`;
+                  }
+              } catch (e) { console.error("Error getting auth token:", e); }
+          }
+          return headers;
+      }
+
+      async function restGetDoc(path) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('REST Error');
+          const docJson = await res.json();
+          return firestoreFieldsToJs(docJson.fields || {});
+      }
+
+      async function restRunQuery(collectionId, filters, opts = {}) {
+          const fieldFilters = (filters || []).map(f => {
+              const op = f.op || 'EQUAL';
+              const value = op === 'IN' ? { arrayValue: { values: (f.value || []).map(toFirestoreValue) } } : toFirestoreValue(f.value);
+              return { fieldFilter: { field: { fieldPath: f.field }, op, value } };
+          });
+          let where = fieldFilters.length === 1 ? fieldFilters[0] : (fieldFilters.length > 1 ? { compositeFilter: { op: 'AND', filters: fieldFilters } } : undefined);
+
+          const structuredQuery = { from: [{ collectionId }] };
+          if (where) structuredQuery.where = where;
+          if (opts.orderByField) structuredQuery.orderBy = [{ field: { fieldPath: opts.orderByField }, direction: opts.orderByDir === 'desc' ? 'DESCENDING' : 'ASCENDING' }];
+          if (opts.limit) structuredQuery.limit = opts.limit;
+
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:runQuery?key=${firebaseConfig.apiKey}`, {
+              method: 'POST', headers: headers, body: JSON.stringify({ structuredQuery })
+          });
+          if (!res.ok) throw new Error('REST Query Error');
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const parts = row.document.name.split('/');
+              results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+      // ================================================================
+
+      const sidebarUserName = document.getElementById('sidebar-user-name');
+      const sidebarProfileImg = document.getElementById('sidebar-profile-img');
+      const headerProfileImg = document.getElementById('header-profile-img');
+      const certsGrid = document.getElementById('certificates-grid');
+
+      // Notification Elements
+      const bellBtn = document.getElementById('bell-btn');
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const notifBadge = document.getElementById('notif-badge');
+      const notifList = document.getElementById('notif-list');
+      const dropdownCount = document.getElementById('dropdown-count');
+
+      let currentUser = null;
+      let userDataGlobal = null;
+      let latestNotificationTime = 0;
+      let notifInterval = null;
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                const userData = await restGetDoc(`users/${user.uid}`);
+                if (userData) {
+                    userDataGlobal = userData;
+                    if (userDataGlobal.role === 'admin') { window.location.replace("admin-dashboard.html"); return; }
+                    if (userDataGlobal.role === 'instructor') { window.location.replace("instructor-dashboard.html"); return; }
+
+                    loadUserData(user, userDataGlobal);
+                    loadCertificates(user.uid);
+                    loadNotifications(user.uid); 
+                }
+            } catch (error) { console.error(error); }
+        } else {
+            window.location.replace("login.html");
+        }
+      });
+
+      function loadUserData(user, data) {
+          const fullName = data.name || user.displayName || "طالب";
+          const photo = data.profileImage || user.photoURL || `https://ui-avatars.com/api/?name=${fullName}&background=6D28D9&color=fff`;
+
+          if(sidebarUserName) sidebarUserName.textContent = fullName;
+          if(sidebarProfileImg) sidebarProfileImg.src = photo;
+          if(headerProfileImg) headerProfileImg.src = photo;
+      }
+
+      async function loadCertificates(userId) {
+          try {
+              const enrollments = await restRunQuery("enrollments", [
+                  { field: "studentId", value: userId },
+                  { field: "status", value: "approved" }
+              ]);
+              
+              certsGrid.innerHTML = '';
+              let hasCertificates = false;
+
+              for (const enrollData of enrollments) {
+                  const courseId = enrollData.courseId;
+                  const cData = await restGetDoc(`courses/${courseId}`);
+                  
+                  if(cData) {
+                      if(cData.hasCertificate) {
+                          let totalLessons = 0;
+                          if(cData.sections) cData.sections.forEach(sec => totalLessons += sec.lessons.length);
+                          
+                          const completedCount = enrollData.completedLessons ? enrollData.completedLessons.length : 0;
+                          const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+
+                          if(progressPercent >= 100) {
+                              hasCertificates = true;
+                              let completionDate = enrollData.completedAt ? new Date(enrollData.completedAt.seconds * 1000).toLocaleDateString('ar-EG') : new Date().toLocaleDateString('ar-EG');
+                              
+                              const html = `
+                                <div class="cert-card">
+                                    <i class="fas fa-award cert-icon"></i>
+                                    <div class="cert-course-title">${enrollData.courseTitle}</div>
+                                    <div class="cert-date">تاريخ الإصدار: ${completionDate}</div>
+                                    <div class="cert-actions">
+                                        <button class="btn btn-outline-primary" style="border:1px solid var(--primary-color); color:var(--primary-color); background:transparent;" 
+                                                onclick="generateCertificate('${userDataGlobal.name}', '${enrollData.courseTitle}', '${completionDate}')">
+                                            <i class="fas fa-eye"></i> عرض
+                                        </button>
+                                    </div>
+                                </div>
+                              `;
+                              certsGrid.insertAdjacentHTML('beforeend', html);
+                          }
+                      }
+                  }
+              }
+
+              if (!hasCertificates) {
+                  certsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-signature"></i>
+                        <h3>لا توجد شهادات بعد</h3>
+                        <p>أكمل موادك بنسبة 100% للحصول على شهادات الإتمام.</p>
+                        <a href="courses.html" class="btn btn-primary" style="margin-top:10px; border-radius:12px;">العودة للمكتبة</a>
+                    </div>
+                  `;
+              }
+
+          } catch (error) {
+              console.error(error);
+              certsGrid.innerHTML = '<p style="color:red; text-align:center;">حدث خطأ في تحميل الشهادات.</p>';
+          }
+      }
+
+      window.generateCertificate = (studentName, courseName, date) => {
+          document.getElementById('cert-student-name-display').textContent = studentName;
+          document.getElementById('cert-course-name-display').textContent = courseName;
+          document.getElementById('cert-date-display').textContent = date;
+          document.getElementById('cert-modal').style.display = 'flex';
+      }
+
+      window.closeCertModal = () => {
+          document.getElementById('cert-modal').style.display = 'none';
+      }
+
+      window.downloadImage = async (event) => {
+          const btn = event.currentTarget;
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+          btn.disabled = true;
+
+          try {
+              const node = document.getElementById('certificate-node');
+              const wrapper = document.getElementById('cert-wrapper');
+              
+              // حفظ حالة التصغير الحالية
+              const origTransform = wrapper.style.transform;
+              
+              // إلغاء التصغير لثانية لأخذ لقطة واضحة ومفرودة
+              wrapper.style.transform = 'none';
+              
+              // انتظار بسيط لإعطاء المتصفح فرصة لتحديث الأبعاد
+              await new Promise(r => setTimeout(r, 100));
+
+              const canvas = await html2canvas(node, { 
+                  scale: 2, 
+                  useCORS: true,
+                  backgroundColor: '#ffffff',
+                  width: 1122,
+                  height: 793
+              });
+
+              // إرجاع التصغير
+              wrapper.style.transform = origTransform;
+
+              const link = document.createElement('a');
+              link.download = `Certificate_${document.getElementById('cert-course-name-display').textContent}.png`;
+              link.href = canvas.toDataURL('image/png', 1.0);
+              link.click();
+          } catch(e) {
+              console.error(e);
+              alert("حدث خطأ أثناء حفظ الصورة");
+          } finally {
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+          }
+      }
+
+      window.downloadPDF = async (event) => {
+          const btn = event.currentTarget;
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+          btn.disabled = true;
+
+          try {
+              const node = document.getElementById('certificate-node');
+              const wrapper = document.getElementById('cert-wrapper');
+              
+              // إزالة التصغير لأخذ اللقطة بشكل كامل وعرضي
+              const origTransform = wrapper.style.transform;
+              wrapper.style.transform = 'none';
+              await new Promise(r => setTimeout(r, 100));
+
+              const canvas = await html2canvas(node, { 
+                  scale: 2, 
+                  useCORS: true,
+                  backgroundColor: '#ffffff',
+                  width: 1122,
+                  height: 793
+              });
+              
+              wrapper.style.transform = origTransform;
+              
+              const imgData = canvas.toDataURL('image/jpeg', 1.0);
+              
+              const { jsPDF } = window.jspdf;
+              // ضبط الـ PDF ليكون بصيغة A4 عريضة حصراً
+              const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+              
+              pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+              pdf.save(`Certificate_${document.getElementById('cert-course-name-display').textContent}.pdf`);
+          } catch(e) {
+              console.error(e);
+              alert("حدث خطأ أثناء تحميل الـ PDF");
+          } finally {
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+          }
+      }
+
+      function loadNotifications(uid) {
+          async function fetchNotifs() {
+              try {
+                  const notifications = await restRunQuery("system_notifications", [
+                      { field: "target", op: "IN", value: ["all", "student"] }
+                  ], { orderByField: "createdAt", orderByDir: "desc", limit: 20 });
+
+                  notifList.innerHTML = '';
+                  let unreadCount = 0;
+                  const lastSeenTime = localStorage.getItem(`last_notif_time_${uid}`) || 0;
+
+                  if (notifications.length === 0) {
+                      notifBadge.style.display = 'none';
+                      notifList.innerHTML = '<p style="text-align:center; padding:20px; color:#999; font-size:12px;">لا توجد إشعارات</p>';
+                      return;
+                  }
+
+                  const firstDoc = notifications[0];
+                  if(firstDoc.createdAt) latestNotificationTime = firstDoc.createdAt.seconds;
+
+                  notifications.forEach(n => {
+                      const date = n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'الآن';
+                      const notifTime = n.createdAt ? n.createdAt.seconds : 0;
+                      
+                      if (notifTime > lastSeenTime) unreadCount++;
+
+                      let iconClass = 'fa-info'; let colorClass = 'type-info';
+                      if(n.type === 'success') { iconClass = 'fa-check'; colorClass = 'type-success'; }
+                      if(n.type === 'warning') { iconClass = 'fa-exclamation'; colorClass = 'type-warning'; }
+                      if(n.type === 'alert') { iconClass = 'fa-bell'; colorClass = 'type-alert'; }
+
+                      const isUnreadClass = (notifTime > lastSeenTime) ? 'unread' : '';
+
+                      const html = `
+                        <div class="notif-item ${isUnreadClass}">
+                            <div class="notif-icon-box ${colorClass}"><i class="fas ${iconClass}"></i></div>
+                            <div class="notif-content">
+                                <h5>${n.title}</h5>
+                                <p>${n.message}</p>
+                                <span class="notif-time">${date}</span>
+                            </div>
+                        </div>`;
+                      notifList.innerHTML += html;
+                  });
+
+                  if (unreadCount > 0) {
+                      notifBadge.style.display = 'flex';
+                      notifBadge.textContent = unreadCount > 9 ? '+9' : unreadCount;
+                      dropdownCount.textContent = unreadCount + ' جديد';
+                  } else {
+                      notifBadge.style.display = 'none';
+                      dropdownCount.textContent = 'لا يوجد جديد';
+                  }
+              } catch (e) { console.error("Notif Error:", e); }
+          }
+
+          if (notifInterval) clearInterval(notifInterval);
+          fetchNotifs();
+          notifInterval = setInterval(fetchNotifs, 20000);
+      }
+
+      bellBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          notifDropdown.classList.toggle('active');
+          if (notifDropdown.classList.contains('active')) {
+              notifBadge.style.display = 'none';
+              if(currentUser && latestNotificationTime > 0) {
+                  localStorage.setItem(`last_notif_time_${currentUser.uid}`, latestNotificationTime);
+                  dropdownCount.textContent = 'لا يوجد جديد';
+                  setTimeout(() => {
+                      document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+                  }, 2000);
+              }
+          }
+      });
+
+      // الاعتماد الكلي على script.js في قفل القائمة الخاصة بالمستخدم
+      document.addEventListener('click', (e) => {
+          if (bellBtn && !bellBtn.contains(e.target)) notifDropdown.classList.remove('active');
+      });
+
+      const handleLogout = async (e) => {
+          e.preventDefault();
+          await signOut(auth);
+          window.location.href = "login.html";
+      };
+      
+      if(document.getElementById('logout-btn')) document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+    </script>
+</body>
+</html>

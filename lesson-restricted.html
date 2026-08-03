@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنبيه هام: تقييد وصول المحتوى - Sidra Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #6D28D9;
+            --warning-red: #ef4444;
+        }
+
+        /* --- روح التطبيق الأصلي (Native App Feel) --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* السماح بالكتابة داخل الفورم */
+        input, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        /* --- الهيدر الزجاجي --- */
+        .simple-header {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 15px 25px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary-color); text-decoration: none; }
+        .back-home { text-decoration: none; color: #4b5563; font-size: 0.9rem; transition: color 0.3s; font-weight: bold; display: flex; align-items: center; gap: 6px;}
+        .back-home:hover { color: var(--primary-color); }
+
+        .main-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+
+        /* --- كارت التنبيه (Glassmorphism) --- */
+        .restriction-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.8);
+            border-top: 5px solid var(--warning-red);
+            transition: all 0.3s ease;
+        }
+
+        .icon-box { color: var(--warning-red); font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(239, 68, 68, 0.2)); }
+        h1 { font-weight: 800; color: #111827; margin-bottom: 15px; font-size: 1.8rem; }
+        
+        .status-badge {
+            display: inline-block;
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--warning-red);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* --- صندوق الرسالة الزجاجي --- */
+        .message-content {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            font-size: 15px;
+            text-align: right;
+            background: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .action-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        
+        /* --- الأزرار بستايل iOS --- */
+        .btn {
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-family: 'Tajawal';
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 180px;
+            border: none;
+        }
+
+        .btn-support {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 8px 20px rgba(109, 40, 217, 0.2);
+        }
+        .btn-support:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(109, 40, 217, 0.3); }
+        .btn-support:active { transform: scale(0.96); }
+        .btn-support:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
+
+        .btn-secondary {
+            background-color: rgba(0,0,0,0.05);
+            color: #333;
+        }
+        .btn-secondary:hover { background-color: rgba(0,0,0,0.1); }
+        .btn-secondary:active { transform: scale(0.96); }
+
+        /* --- فورم الدعم الفني الداخلي --- */
+        .support-form-container {
+            display: none;
+            text-align: right;
+            animation: fadeIn 0.3s ease;
+            background: rgba(255,255,255,0.5);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .support-form-container.active { display: block; }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.6) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 12px 15px !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+            font-family: 'Tajawal', sans-serif;
+            color: #333;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            resize: none;
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.9) !important;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.3) !important;
+        }
+        .form-label {
+            display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #111;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .restriction-card { padding: 30px 20px; border-radius: 20px;}
+            .action-buttons { flex-direction: column; width: 100%; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="simple-header">
+        <a href="student-dashboard.html" class="logo">Sidra Academy</a>
+        <a href="student-dashboard.html" class="back-home">لوحة التحكم <i class="fas fa-arrow-left"></i></a>
+    </header>
+
+    <main class="main-container">
+        <div class="restriction-card">
+            <div class="icon-box"><i class="fas fa-ban"></i></div>
+            <h1>إيقاف مؤقت للحساب</h1>
+            <div class="status-badge">وصول مقيد للمكتبة</div>
+
+            <div class="message-content" id="message-content">
+                <p>عذراً، لقد تم <strong>إيقاف حسابك مؤقتاً</strong> من قبل الإدارة، ولن تتمكن من الوصول للمواد التعليمية حالياً.</p>
+                <p style="margin-top: 10px;">لا يزال بإمكانك تصفح لوحة التحكم. يرجى التواصل مع الدعم الفني لحل المشكلة واستعادة الصلاحيات.</p>
+                <p style="color: var(--warning-red); font-weight: bold; margin-top: 15px; font-size: 13px;">
+                    * ملاحظة: في حال عدم حل المشكلة، قد يتم إغلاق الحساب نهائياً.
+                </p>
+            </div>
+
+            <!-- أزرار الإجراءات الافتراضية -->
+            <div class="action-buttons" id="default-actions">
+                <button type="button" class="btn btn-support" onclick="toggleSupportForm(true)">
+                    <i class="fas fa-headset"></i> مراسلة الدعم الفني
+                </button>
+                <a href="student-dashboard.html" class="btn btn-secondary">
+                    العودة للوحة التحكم
+                </a>
+            </div>
+
+            <!-- فورم التواصل الداخلي (يظهر عند الضغط) -->
+            <div class="support-form-container" id="support-form-container">
+                <form id="support-form">
+                    <label class="form-label">البريد الإلكتروني المسجل:</label>
+                    <input type="email" id="support-email" class="form-control" readonly style="opacity: 0.7; cursor: not-allowed;">
+                    
+                    <label class="form-label">رسالتك للإدارة:</label>
+                    <textarea id="support-message" class="form-control" rows="4" placeholder="اكتب استفسارك أو مشكلتك هنا..." required></textarea>
+                    
+                    <div class="action-buttons" style="margin-top: 5px;">
+                        <button type="submit" class="btn btn-support" id="submit-support-btn">إرسال الرسالة</button>
+                        <button type="button" class="btn btn-secondary" onclick="toggleSupportForm(false)">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- حاوية الإشعارات -->
+    <div id="notification-container" style="position:fixed; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10002; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+            authDomain: "sidra-855f2.firebaseapp.com",
+            projectId: "sidra-855f2",
+            storageBucket: "sidra-855f2.firebasestorage.app",
+            messagingSenderId: "724377690776",
+            appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+            measurementId: "G-WD5BZ4S0S4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // دالة لعرض الإشعارات (Toast)
+        window.showNotification = function(message, type = 'error') {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div');
+            toast.style.cssText = `background: white; border-left: 4px solid ${type === 'success' ? '#10b981' : '#e74c3c'}; padding: 15px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 14px; animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;`;
+            const iconColor = type === 'success' ? '#10b981' : '#e74c3c';
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="color:${iconColor}; font-size:18px;"></i><span style="color:#333;">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // إظهار وإخفاء الفورم
+        window.toggleSupportForm = function(show) {
+            const defaultActions = document.getElementById('default-actions');
+            const formContainer = document.getElementById('support-form-container');
+            const messageContent = document.getElementById('message-content');
+            
+            if (show) {
+                defaultActions.style.display = 'none';
+                messageContent.style.display = 'none';
+                formContainer.classList.add('active');
+            } else {
+                formContainer.classList.remove('active');
+                defaultActions.style.display = 'flex';
+                messageContent.style.display = 'block';
+                document.getElementById('support-message').value = '';
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // تعبئة الإيميل أوتوماتيكياً
+                document.getElementById('support-email').value = user.email;
+
+                const userRef = doc(db, "users", user.uid);
+                
+                // المراقبة اللحظية للحظر
+                onSnapshot(userRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        if (userData.isBanned !== true) {
+                            window.location.replace("student-dashboard.html");
+                        }
+                    }
+                });
+            } else {
+                window.location.replace("login.html");
+            }
+        });
+
+        // إرسال الرسالة إلى فايربيز
+        const supportForm = document.getElementById('support-form');
+        const submitBtn = document.getElementById('submit-support-btn');
+
+        supportForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const message = document.getElementById('support-message').value.trim();
+            if (!message) return;
+
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+            submitBtn.disabled = true;
+
+            try {
+                // حفظ الرسالة في كوليكشن support_requests ليقرأها الأدمن
+                await addDoc(collection(db, "support_requests"), {
+                    userId: currentUser.uid,
+                    userName: currentUser.displayName || "بدون اسم",
+                    userEmail: currentUser.email,
+                    message: message,
+                    status: "new",
+                    type: "ban_appeal", // لتمييز نوع الرسالة
+                    createdAt: serverTimestamp()
+                });
+
+                window.showNotification("تم إرسال رسالتك للإدارة بنجاح، سيتم مراجعتها قريباً.", "success");
+                window.toggleSupportForm(false); // إغلاق الفورم بعد الإرسال
+            } catch (error) {
+                console.error("Error sending support message:", error);
+                window.showNotification("حدث خطأ أثناء إرسال الرسالة، حاول مرة أخرى.", "error");
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+    <style>
+        @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</body>
+</html>

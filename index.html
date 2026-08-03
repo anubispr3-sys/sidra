@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>Sidra Academy - الرئيسية</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- روح التطبيق (iOS Feel & Safe Area) --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; }
+
+        /* --- تأثير Glassmorphism (شفافية وضبابية وبدون حواف) --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* تحسين قسم الهيرو (البداية) ليتماشى مع الديزاين الزجاجي */
+        .hero-section {
+            background: transparent !important;
+            padding: 60px 0;
+        }
+        .hero-content {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 60px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .hero-title { color: #111827 !important; }
+        .hero-subtitle { color: #4b5563 !important; }
+
+        /* حقل البحث الزجاجي */
+        .search-bar-wrapper {
+            background: rgba(255, 255, 255, 0.6) !important;
+            border-radius: 16px !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.8) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+        }
+        .search-input { background: transparent !important; color: #333 !important; }
+        .search-button { background: var(--primary-color) !important; border-radius: 12px; margin: 4px; padding: 0 20px; }
+
+        /* كروت الواجهة (المقترحات، المميزات، الدكاترة) */
+        .feature-item, .instructor-card, .course-card {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-item:active, .instructor-card:active, .course-card:active {
+            transform: scale(0.97);
+        }
+
+        /* --- تنسيقات الشريط السفلي للموبايل --- */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .mobile-bottom-nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 65px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            flex: 1;
+            transition: 0.3s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        .nav-item.active {
+            color: var(--primary-color, #2563eb);
+        }
+        
+        .user-area { display: flex; align-items: center; gap: 15px; }
+        .user-welcome { font-weight: bold; color: #333; font-size: 14px; }
+        #mobile-guest-links { display: flex; flex-direction: column; gap: 15px; }
+        .btn-logout { background-color: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.2); padding: 8px 15px; border-radius: 12px; cursor: pointer; font-family: 'Tajawal', sans-serif; transition: 0.3s; font-weight: bold; }
+        .btn-logout:hover { background-color: #e74c3c; color: white; }
+        .btn-details-elegant {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 8px 24px; background-color: rgba(255,255,255,0.7); color: var(--primary-color);
+            border: 1px solid var(--primary-color); border-radius: 12px; font-size: 13px;
+            font-family: 'Tajawal', sans-serif; font-weight: 700; text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* إخفاء أقسام معينة لتعزيز الـ Native Look */
+        .features-section, .instructors-section, .featured-courses {
+            background: transparent !important;
+            padding: 60px 0;
+        }
+
+        /* --- الفوتر المصغر للموبايل (Mobile Mini Footer) --- */
+        .mobile-mini-footer {
+            display: none;
+            text-align: center;
+            padding: 20px 20px 40px 20px;
+        }
+        .mobile-mini-footer a {
+            color: var(--primary-color);
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .mobile-mini-footer p {
+            color: #888;
+            font-size: 11px;
+            margin-top: 8px;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        @media (max-width: 992px) {
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .mobile-bottom-nav { display: block; }
+            .main-footer { display: none; } /* إخفاء الفوتر الرئيسي في الموبايل */
+            .mobile-mini-footer { display: block; } /* إظهار الفوتر المصغر */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="courses.html">المكتبة</a>
+                <a href="#instructors">الدكاترة</a>
+                <a href="#features">لماذا نحن؟</a>
+            </nav>
+            
+            <div class="header-actions">
+                <div id="guest-actions">
+                    <a href="login.html" class="btn btn-secondary">تسجيل الدخول</a>
+                    <a href="register.html" class="btn btn-primary">ابدأ التعلم الآن</a>
+                </div>
+
+                <div id="user-actions" class="user-area auth-hidden">
+                    <span class="user-welcome" id="user-name-display">مرحباً ..</span>
+                    <a href="#" id="dashboard-link" class="btn btn-primary" style="border-radius: 12px;">لوحة التحكم</a>
+                    <button id="logout-btn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                </div>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+        
+        <div class="mobile-nav" id="mobile-nav">
+            <a href="index.html" class="active">الرئيسية</a>
+            <a href="courses.html">تصفح المكتبة</a>
+            <a href="about.html">من نحن</a>
+            <a href="privacy-policy.html">الشروط والسياسات</a>
+            
+            <hr style="border:0; border-top:1px solid rgba(0,0,0,0.05); margin: 10px 0;">
+            
+            <div id="mobile-guest-links">
+                <a href="login.html">تسجيل الدخول</a>
+                <a href="register.html" class="btn btn-primary" style="border-radius: 12px;">ابدأ التعلم الآن</a>
+            </div>
+            <div id="mobile-user-links" class="auth-hidden">
+                <a href="#" id="mobile-dashboard-link" style="color: var(--primary-color); font-weight: bold;">لوحة التحكم</a>
+                <a href="#" id="mobile-logout-btn" style="color: #e74c3c;">تسجيل الخروج</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="mobile-bottom-nav">
+        <div class="mobile-bottom-nav-container">
+            <a href="index.html" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </a>
+            <a href="courses.html" class="nav-item">
+                <i class="fas fa-book-open"></i>
+                <span>المكتبة</span>
+            </a>
+            <a href="about.html" class="nav-item">
+                <i class="fas fa-info-circle"></i>
+                <span>من نحن</span>
+            </a>
+            <a href="login.html" class="nav-item" id="bottom-nav-auth-link">
+                <i class="fas fa-user"></i>
+                <span id="bottom-nav-auth-text">حسابي</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title" id="hero-title">...</h1>
+                <p class="hero-subtitle" id="hero-subtitle">...</p>
+                <div class="search-bar-wrapper">
+                    <input type="search" placeholder="ماذا تريد أن تتعلم اليوم؟" class="search-input" id="main-search-input">
+                    <button class="search-button"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section id="courses" class="featured-courses">
+        <div class="container">
+            <h2 class="section-title">مقترحات لك</h2>
+            <div class="courses-grid" id="featured-courses-container">
+                <p style="text-align:center; grid-column:1/-1; padding: 40px; color: #777;">
+                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل المحتوى...
+                </p>
+            </div>
+            <div style="text-align:center; margin-top:30px;">
+                <a href="courses.html" class="btn btn-outline-primary" style="background: rgba(255,255,255,0.5); border:1px solid var(--primary-color); color:var(--primary-color); padding:12px 25px; border-radius:12px; text-decoration:none; font-weight:bold;">عرض المكتبة بالكامل</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title">لماذا تختار Sidra Academy؟</h2>
+            <div class="features-grid">
+                <div class="feature-item" style="padding: 30px;">
+                    <div class="feature-icon-wrapper" style="background: rgba(109, 40, 217, 0.1); color: var(--primary-color);"><i class="fas fa-award feature-icon"></i></div>
+                    <h3 class="feature-title">محتوى عالي الجودة</h3>
+                    <p class="feature-description" style="color: #555;">مواد تعليمية تم إعدادها بواسطة خبراء لضمان أفضل تجربة تعليمية.</p>
+                </div>
+                <div class="feature-item" style="padding: 30px;">
+                    <div class="feature-icon-wrapper" style="background: rgba(109, 40, 217, 0.1); color: var(--primary-color);"><i class="fas fa-infinity feature-icon"></i></div>
+                    <h3 class="feature-title">وصول دائم</h3>
+                    <p class="feature-description" style="color: #555;">احصل على وصول دائم لموادك التعليمية وتحديثاتها في أي وقت.</p>
+                </div>
+                <div class="feature-item" style="padding: 30px;">
+                     <div class="feature-icon-wrapper" style="background: rgba(109, 40, 217, 0.1); color: var(--primary-color);"><i class="fas fa-mobile-alt feature-icon"></i></div>
+                    <h3 class="feature-title">تعلم في أي وقت</h3>
+                    <p class="feature-description" style="color: #555;">شاهد دروسك من أي جهاز، سواء كان حاسوبك أو هاتفك المحمول بسهولة.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="instructors" class="instructors-section">
+        <div class="container">
+            <h2 class="section-title">نخبة الدكاترة</h2>
+            <div class="instructors-grid" id="featured-instructors-container">
+                <p style="text-align:center; width:100%; color:#777;">جاري التحميل...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- الفوتر المصغر الخاص بالموبايل لتسهيل وصول مراجع أبل للسياسات -->
+    <div class="mobile-mini-footer">
+        <a href="privacy-policy.html">شروط الاستخدام وسياسة الخصوصية</a>
+        <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">Sidra Academy</h3>
+                    <p>منصة تعليمية تهدف لتمكين الأفراد من خلال توفير محتوى عربي عالي الجودة.</p>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">روابط سريعة</h3>
+                    <ul>
+                        <li><a href="about.html">من نحن</a></li>
+                        <li><a href="courses.html">تصفح المكتبة</a></li>
+                        <li class="ios-hidden"><a href="register.html?role=instructor">كن دكتوراً معنا</a></li>
+                        <li><a href="privacy-policy.html">شروط الاستخدام وسياسة الخصوصية</a></li> 
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script src="script.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, query, where, limit, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      
+      const db = initializeFirestore(app, {
+          localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}),
+          experimentalForceLongPolling: true
+      });
+
+      // ================================================================
+      // طبقة REST بديلة عن Firestore SDK (getDoc/getDocs) لتجنب تعليق
+      // اتصال WebChannel/long-polling جوه بعض WKWebViews (تطبيقات
+      // volt.build/Cordova). كل القراءات بتتم بـ fetch() عادي.
+      // ================================================================
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return value.timestampValue;
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+      function toFirestoreValue(v) {
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+          return { stringValue: String(v) };
+      }
+      // جلب مستند واحد بمساره الكامل، مثال: restGetDoc('site_settings/hero_section')
+      async function restGetDoc(path) {
+          const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${path}?key=${firebaseConfig.apiKey}`;
+          const res = await fetch(url);
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('REST-HTTP-' + res.status + ': ' + (await res.text()).slice(0, 300));
+          const docJson = await res.json();
+          return firestoreFieldsToJs(docJson.fields || {});
+      }
+      // تنفيذ query بفلاتر AND، مثال:
+      // restRunQuery('courses', [{field:'isFeatured', op:'EQUAL', value:true}], 3)
+      async function restRunQuery(collectionId, filters, limitN) {
+          const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents:runQuery?key=${firebaseConfig.apiKey}`;
+          const fieldFilters = (filters || []).map(f => ({
+              fieldFilter: { field: { fieldPath: f.field }, op: f.op || 'EQUAL', value: toFirestoreValue(f.value) }
+          }));
+          let where;
+          if (fieldFilters.length === 1) where = fieldFilters[0];
+          else if (fieldFilters.length > 1) where = { compositeFilter: { op: 'AND', filters: fieldFilters } };
+
+          const structuredQuery = { from: [{ collectionId }] };
+          if (where) structuredQuery.where = where;
+          if (limitN) structuredQuery.limit = limitN;
+
+          const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ structuredQuery })
+          });
+          if (!res.ok) throw new Error('REST-HTTP-' + res.status + ': ' + (await res.text()).slice(0, 300));
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const parts = row.document.name.split('/');
+              results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+      // ==============================================================
+      // تهيئة إشعارات الموبايل (Capacitor) وحفظ الـ Token
+      // ==============================================================
+      let cachedFcmToken = null; 
+
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+          const { PushNotifications } = window.Capacitor.Plugins;
+
+          const initPushNotifications = async () => {
+              let permStatus = await PushNotifications.requestPermissions();
+
+              if (permStatus.receive === 'granted') {
+                  await PushNotifications.register();
+              }
+
+              await PushNotifications.addListener('registration', (token) => {
+                  console.log('FCM Token Retrieved:', token.value);
+                  cachedFcmToken = token.value; 
+                  saveTokenIfUserExists(); 
+              });
+
+              await PushNotifications.addListener('pushNotificationReceived', notification => {
+                  console.log('وصل إشعار جديد:', notification.title);
+              });
+
+              await PushNotifications.addListener('pushNotificationActionPerformed', notification => {
+                  console.log('المستخدم ضغط على الإشعار');
+              });
+          };
+
+          initPushNotifications();
+      }
+
+      async function saveTokenIfUserExists() {
+          const user = auth.currentUser;
+          if (user && cachedFcmToken) {
+              try {
+                  const userRef = doc(db, "users", user.uid);
+                  await updateDoc(userRef, { fcmToken: cachedFcmToken });
+                  console.log('تم حفظ توكن الإشعارات بنجاح في قاعدة البيانات!');
+                  cachedFcmToken = null; 
+              } catch (err) {
+                  console.error('فشل حفظ التوكن:', err);
+              }
+          }
+      }
+      // ==============================================================
+
+      const userActions = document.getElementById('user-actions');
+      const guestActions = document.getElementById('guest-actions');
+      const userNameDisplay = document.getElementById('user-name-display');
+      const dashboardLink = document.getElementById('dashboard-link');
+      const mobileUserLinks = document.getElementById('mobile-user-links');
+      const mobileGuestLinks = document.getElementById('mobile-guest-links');
+      const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
+
+      const bottomNavAuthLink = document.getElementById('bottom-nav-auth-link');
+      const bottomNavAuthText = document.getElementById('bottom-nav-auth-text');
+
+      onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            saveTokenIfUserExists();
+              if(guestActions) guestActions.classList.add('auth-hidden');
+              if(mobileGuestLinks) mobileGuestLinks.classList.add('auth-hidden');
+              if(userActions) userActions.classList.remove('auth-hidden');
+              if(mobileUserLinks) mobileUserLinks.classList.remove('auth-hidden');
+              if(userNameDisplay) userNameDisplay.textContent = `مرحباً، ${user.displayName ? user.displayName.split(' ')[0] : 'مستخدم'}`;
+
+              let dashUrl = "student-dashboard.html"; 
+              try {
+                  const userData = await restGetDoc(`users/${user.uid}`);
+                  if(userData) {
+                      const role = userData.role;
+                      if(role === 'admin') dashUrl = "admin-dashboard.html";
+                      else if(role === 'instructor') dashUrl = "instructor-dashboard.html";
+                  }
+              } catch(e) { console.log(e); }
+              
+              if(dashboardLink) dashboardLink.href = dashUrl;
+              if(mobileDashboardLink) mobileDashboardLink.href = dashUrl;
+
+              if(bottomNavAuthLink) bottomNavAuthLink.href = dashUrl;
+              if(bottomNavAuthText) bottomNavAuthText.textContent = "لوحتي";
+
+          } else {
+              if(guestActions) guestActions.classList.remove('auth-hidden');
+              if(mobileGuestLinks) mobileGuestLinks.classList.remove('auth-hidden');
+              if(userActions) userActions.classList.add('auth-hidden');
+              if(mobileUserLinks) mobileUserLinks.classList.add('auth-hidden');
+
+              if(bottomNavAuthLink) bottomNavAuthLink.href = "login.html";
+              if(bottomNavAuthText) bottomNavAuthText.textContent = "حسابي";
+          }
+      });
+
+      async function loadHeroText() {
+          try {
+              const data = await restGetDoc('site_settings/hero_section');
+              if (data) {
+                  if(data.title) document.getElementById('hero-title').textContent = data.title;
+                  if(data.subtitle) document.getElementById('hero-subtitle').textContent = data.subtitle;
+              } else {
+                  document.getElementById('hero-title').textContent = "بوابتك للتعلم الاحترافي";
+                  document.getElementById('hero-subtitle').textContent = "منصة سدرة التعليمية";
+              }
+          } catch(e) { console.error("Error loading hero:", e); }
+      }
+
+      async function loadFeaturedCourses() {
+          const container = document.getElementById('featured-courses-container');
+          if(!container) return;
+          try {
+              const courses = await restRunQuery('courses', [
+                  { field: 'isFeatured', value: true },
+                  { field: 'status', value: 'published' }
+              ], 3);
+              container.innerHTML = ''; 
+              if(courses.length === 0) {
+                  container.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#777;">لا توجد مواد مقترحة حالياً.</p>';
+                  return;
+              }
+              courses.forEach(c => {
+                  const thumb = c.thumbnail || 'https://via.placeholder.com/300x200';
+                  
+                  const html = `
+                    <div class="course-card">
+                        <img src="${thumb}" alt="${c.title}" class="course-thumb" style="width: 100%; height: 200px; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                        <div class="course-content" style="padding: 20px;">
+                            <div>
+                                <span class="course-cat" style="background: rgba(255,255,255,0.7); padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; color: var(--primary-color);">${c.category || 'عام'}</span>
+                                <h3 class="course-title" style="margin: 15px 0; font-size: 18px; color: #333; line-height: 1.4;">${c.title}</h3>
+                                <div class="course-instructor" style="color: #666; font-size: 13px; margin-bottom: 20px;">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>${c.instructorName || 'دكتور'}</span>
+                                </div>
+                            </div>
+                            <div class="course-footer" style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 15px;">
+                                <a href="course-details.html?id=${c.id}" class="btn-details-elegant">تصفح المادة <i class="fas fa-arrow-left"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                  `;
+                  container.insertAdjacentHTML('beforeend', html);
+              });
+          } catch(e) { console.error(e); container.innerHTML = '<p style="color:red; text-align:center;">حدث خطأ في تحميل المحتوى</p>'; }
+      }
+
+      async function loadFeaturedInstructors() {
+          const container = document.getElementById('featured-instructors-container');
+          if(!container) return;
+          try {
+              const instructors = await restRunQuery('users', [
+                  { field: 'isFeatured', value: true },
+                  { field: 'role', value: 'instructor' }
+              ], 4);
+              container.innerHTML = '';
+              if(instructors.length === 0) {
+                  container.innerHTML = '<p style="text-align:center; width:100%; color:#777;">لا يوجد مدرسون مميزون حالياً.</p>';
+                  return;
+              }
+              instructors.forEach(u => {
+                  const img = u.profileImage || 'https://placehold.co/150';
+                  const html = `
+                     <div class="instructor-card" style="padding: 20px; text-align: center;">
+                        <img src="${img}" class="instructor-image" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:15px; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        <h3 class="instructor-name" style="margin:5px 0; font-size: 18px; color: #333;">${u.name}</h3>
+                        <p class="instructor-title" style="color:#666; font-size:13px;">${u.bio ? u.bio.substring(0, 40)+'...' : 'دكتور معتمد'}</p>
+                    </div>
+                  `;
+                  container.insertAdjacentHTML('beforeend', html);
+              });
+          } catch(e) { console.error(e); }
+      }
+
+      loadHeroText();
+      loadFeaturedCourses();
+      loadFeaturedInstructors();
+
+      document.querySelector('.search-button').addEventListener('click', () => {
+          const term = document.getElementById('main-search-input').value;
+          if(term) window.location.href = `courses.html?search=${encodeURIComponent(term)}`;
+      });
+
+      const handleLogout = async (e) => {
+          e.preventDefault();
+          await signOut(auth);
+          window.location.reload();
+      };
+      if(document.getElementById('logout-btn')) document.getElementById('logout-btn').addEventListener('click', handleLogout);
+      if(document.getElementById('mobile-logout-btn')) document.getElementById('mobile-logout-btn').addEventListener('click', handleLogout);
+
+    </script>
+
+
+</body>
+</html>

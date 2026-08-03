@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>الشروط والخصوصية - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- روح التطبيق الأصلي (Native App Feel) --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; }
+
+        /* --- تأثير Glassmorphism للواجهة --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* --- App Header (Glassmorphism) --- */
+        .app-header {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: calc(env(safe-area-inset-top) + 60px) 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
+            border-radius: 0 0 30px 30px;
+        }
+        .app-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 15px;
+            letter-spacing: -0.5px;
+        }
+        .app-header p {
+            font-size: 16px;
+            color: #4b5563;
+            margin: 0 auto;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        /* --- تنسيقات كروت السياسة (Glassmorphism) --- */
+        .policies-section { 
+            padding: 0 20px 80px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            min-height: 70vh;
+            text-align: right;
+            direction: rtl;
+        }
+        
+        .policy-group-title {
+            font-size: 20px;
+            color: #111827;
+            font-weight: 800;
+            margin: 40px 0 20px 0; 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .policy-group-title i { color: var(--primary-color); font-size: 24px; }
+        
+        .policies-list {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        
+        .policy-item {
+            padding: 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.4);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: background 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .policy-item:hover { background: rgba(255,255,255,0.2); }
+        .policy-item:last-child { border-bottom: none; }
+        
+        .policy-icon-wrapper {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 22px;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+        }
+        .policy-icon-wrapper.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .policy-icon-wrapper.purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .policy-icon-wrapper.red { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+        .policy-content {
+            flex: 1;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+        }
+        .policy-content h4 {
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 10px;
+            font-size: 17px;
+            text-align: right;
+        }
+        .policy-content p {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.8;
+            margin: 0;
+            text-align: right;
+        }
+
+        /* --- بانر وفورم الدعم الفني الزجاجي --- */
+        .support-banner { 
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; 
+            padding: 40px 25px; 
+            text-align: center; 
+            margin-top: 50px; 
+            border: 1px solid rgba(255,255,255,0.6); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05); 
+        }
+        .support-banner h4 { color: #111827; margin-bottom: 12px; font-size: 20px; font-weight: 800; text-align: center; }
+        .support-banner p { color: #4b5563; font-size: 15px; margin-bottom: 30px; line-height: 1.6; text-align: center; }
+        
+        .action-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        
+        .btn-support {
+            background-color: var(--primary-color); color: white; padding: 12px 25px;
+            border-radius: 12px; font-family: 'Tajawal'; font-weight: bold; font-size: 15px;
+            border: none; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 8px 20px rgba(109, 40, 217, 0.2);
+        }
+        .btn-support:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(109, 40, 217, 0.3); }
+        .btn-support:active { transform: scale(0.96); }
+        .btn-support:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
+
+        .btn-secondary {
+            background-color: rgba(0,0,0,0.05); color: #333; padding: 12px 25px;
+            border-radius: 12px; font-family: 'Tajawal'; font-weight: bold; font-size: 15px;
+            border: none; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center;
+        }
+        .btn-secondary:hover { background-color: rgba(0,0,0,0.1); }
+        .btn-secondary:active { transform: scale(0.96); }
+
+        .support-form-container {
+            display: none; text-align: right; animation: fadeIn 0.3s ease; margin-top: 20px;
+            background: rgba(255,255,255,0.4); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.5);
+        }
+        .support-form-container.active { display: block; }
+
+        .form-control {
+            width: 100%; background: rgba(255, 255, 255, 0.6) !important; border: none !important;
+            border-radius: 12px !important; padding: 12px 15px !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+            font-family: 'Tajawal', sans-serif; color: #333; margin-bottom: 15px; box-sizing: border-box; transition: all 0.3s ease; resize: none;
+        }
+        .form-control:focus { background: rgba(255, 255, 255, 0.9) !important; outline: none; box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.3) !important; }
+        .form-label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #111; }
+
+        /* --- تنسيقات قائمة المستخدم الاحترافية --- */
+        .user-header-profile { position: relative; cursor: pointer; display: flex; align-items: center; margin-right: auto; }
+        .user-header-profile img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color); padding: 2px; background-color: white; }
+        .user-dropdown { display: none; position: absolute; top: 55px; left: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 15px 50px rgba(0,0,0,0.15); border-radius: 20px; width: 180px; z-index: 1000; flex-direction: column; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+        .user-dropdown.active { display: flex; animation: fadeIn 0.2s ease; }
+        .user-dropdown a { padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; font-family: 'Tajawal'; font-size: 14px; display: flex; gap: 10px; align-items: center; font-weight: 600;}
+        .user-dropdown a:hover { background-color: rgba(255,255,255,0.6); color: var(--primary-color); }
+        .user-dropdown i { width: 15px; text-align: center; color: var(--text-light); }
+        .user-dropdown a:hover i { color: var(--primary-color); }
+        .user-dropdown .logout-link { color: #e74c3c; }
+        .user-dropdown .logout-link i { color: #e74c3c; }
+        .user-dropdown .logout-link:hover { background-color: #fdf2f2; color: #e74c3c; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 992px) {
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .guest-actions, .mobile-menu-toggle { display: none !important; }
+            .main-footer { display: none; }
+            .main-header { display: none; } 
+            .app-header { border-radius: 0 0 20px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="courses.html">المكتبة</a>
+                <a href="about.html">من نحن</a>
+                <a href="privacy-policy.html" class="active">الشروط والخصوصية</a>
+            </nav>
+            <div class="header-actions">
+                <div id="guest-actions" class="guest-actions">
+                    <a href="login.html" class="btn btn-secondary">تسجيل الدخول</a>
+                    <a href="register.html" class="btn btn-primary" style="border-radius: 12px;">ابدأ التعلم الآن</a>
+                </div>
+                <div class="user-header-profile auth-hidden" id="user-actions">
+                    <div id="user-menu-btn">
+                        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="User" id="header-profile-img">
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <a href="#" id="dashboard-link"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+                        <a href="profile-settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+                        <hr style="margin: 0; border: 0; border-top: 1px solid rgba(0,0,0,0.05);">
+                        <a href="#" id="logout-btn" class="logout-link"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+        
+        <div class="app-header">
+            <h1>شروط الاستخدام وسياسة الخصوصية</h1>
+            <p>نلتزم في Sidra Academy بحماية بياناتك وتوفير بيئة تعليمية آمنة وشفافة للجميع.</p>
+        </div>
+
+        <section class="policies-section">
+            
+            <h3 class="policy-group-title"><i class="fas fa-user-shield"></i> خصوصية البيانات</h3>
+            <div class="policies-list">
+                <div class="policy-item">
+                    <div class="policy-icon-wrapper blue"><i class="fas fa-database"></i></div>
+                    <div class="policy-content">
+                        <h4>جمع واستخدام البيانات</h4>
+                        <p>نقوم بجمع معلوماتك الأساسية عند التسجيل، وتتبع تقدمك الدراسي داخل المواد المحفوظة سحابياً. تُستخدم هذه البيانات حصرياً لتحسين تجربتك التعليمية وتأمين حسابك.</p>
+                    </div>
+                </div>
+                <div class="policy-item">
+                    <div class="policy-icon-wrapper purple"><i class="fas fa-share-alt-slash"></i></div>
+                    <div class="policy-content">
+                        <h4>مشاركة البيانات</h4>
+                        <p>بياناتك الشخصية آمنة تماماً. نحن لا نقوم ببيع أو تأجير معلوماتك لأي أطراف خارجية أو جهات تسويقية تحت أي ظرف.</p>
+                    </div>
+                </div>
+                <div class="policy-item">
+                    <div class="policy-icon-wrapper red"><i class="fas fa-user-times"></i></div>
+                    <div class="policy-content">
+                        <h4>حذف الحساب والبيانات</h4>
+                        <p>يحق لك كمستخدم طلب حذف حسابك نهائياً ومسح كافة بياناتك المرتبطة به من خوادمنا في أي وقت. يمكنك تقديم طلب الحذف من خلال نموذج الدعم الفني بالأسفل أو إعدادات حسابك.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="policy-group-title"><i class="fas fa-gavel"></i> سياسات المنصة</h3>
+            <div class="policies-list">
+                <div class="policy-item">
+                    <div class="policy-icon-wrapper"><i class="fas fa-key"></i></div>
+                    <div class="policy-content">
+                        <h4>صلاحيات الوصول</h4>
+                        <p>يتم منحك صلاحية الوصول للمواد التعليمية بناءً على تسجيلك الأكاديمي. يحق لإدارة المنصة تعليق أو سحب هذه الصلاحيات في حال ثبوت مخالفة لأي من شروط وقواعد الاستخدام.</p>
+                    </div>
+                </div>
+                <div class="policy-item">
+                    <div class="policy-icon-wrapper blue"><i class="fas fa-shield-alt"></i></div>
+                    <div class="policy-content">
+                        <h4>حقوق الملكية</h4>
+                        <p>جميع المواد والمحتويات التعليمية مسجلة ومحمية. يُمنع منعاً باتاً مشاركة حسابك الشخصي مع آخرين أو إعادة نشر المحتوى لأي أغراض تجنباً للإيقاف الفوري للحساب.</p>
+                    </div>
+                </div>
+                <div class="policy-item">
+                    <div class="policy-icon-wrapper purple"><i class="fas fa-users"></i></div>
+                    <div class="policy-content">
+                        <h4>بيئة التعلم والمجتمع</h4>
+                        <p>نتوقع من جميع طلابنا الالتزام بالاحترام المتبادل في قسم النقاشات والتعليقات. المنصة مصممة لتكون مساحة آمنة لتبادل الخبرات وتطوير المهارات الأكاديمية.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تم استبدال הוואتساب بفورم تواصل داخلي ليتوافق مع سياسات أبل (Account Deletion & Support) -->
+            <div class="support-banner">
+                <div id="default-support-view">
+                    <h4>نحن هنا دائماً لمساعدتك</h4>
+                    <p>لأي استفسارات عامة، الدعم الفني، أو طلبات حذف البيانات والحساب</p>
+                    <button class="btn-support" onclick="toggleSupportForm(true)"><i class="fas fa-headset"></i> تواصل مع الإدارة</button>
+                </div>
+                
+                <div class="support-form-container" id="support-form-container">
+                    <h4 style="margin-bottom: 20px; color: var(--primary-color);"><i class="fas fa-envelope-open-text"></i> نموذج المراسلة</h4>
+                    <form id="support-form">
+                        <label class="form-label">البريد الإلكتروني المسجل:</label>
+                        <input type="email" id="support-email" class="form-control" readonly style="opacity: 0.7; cursor: not-allowed;" title="يتم جلب البريد تلقائياً">
+                        
+                        <label class="form-label">نوع الطلب:</label>
+                        <select id="support-type" class="form-control">
+                            <option value="general">استفسار عام</option>
+                            <option value="technical">مشكلة تقنية</option>
+                            <option value="delete_account">طلب حذف الحساب وبياناتي نهائياً</option>
+                        </select>
+                        
+                        <label class="form-label">رسالتك:</label>
+                        <textarea id="support-message" class="form-control" rows="4" placeholder="اكتب تفاصيل طلبك أو استفسارك هنا..." required></textarea>
+                        
+                        <div class="action-buttons" style="margin-top: 10px;">
+                            <button type="submit" class="btn-support" id="submit-support-btn" style="flex: 2;">إرسال الطلب</button>
+                            <button type="button" class="btn-secondary" onclick="toggleSupportForm(false)" style="flex: 1;">إلغاء</button>
+                        </div>
+                    </form>
+                    <p id="guest-support-msg" style="display:none; color:#ef4444; font-weight:bold; margin-top:15px; font-size: 14px;"><i class="fas fa-exclamation-triangle"></i> يجب تسجيل الدخول أولاً لتتمكن من مراسلة الإدارة.</p>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- حاوية الإشعارات -->
+    <div id="notification-container" style="position:fixed; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10002; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="privacy-policy.html" class="nav-item active">
+            <i class="fas fa-shield-alt"></i>
+            <span>السياسات</span>
+        </a>
+        <a href="login.html" class="nav-item" id="bottom-nav-auth-link">
+            <i class="fas fa-user"></i>
+            <span id="bottom-nav-auth-text">حسابي</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      let currentUser = null;
+
+      const guestActions = document.getElementById('guest-actions');
+      const userActions = document.getElementById('user-actions');
+      const headerProfileImg = document.getElementById('header-profile-img');
+      const bottomNavAuthLink = document.getElementById('bottom-nav-auth-link');
+      const bottomNavAuthText = document.getElementById('bottom-nav-auth-text');
+      const dashboardLink = document.getElementById('dashboard-link');
+
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuBtn) {
+          userMenuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              userDropdown.classList.toggle('active');
+          });
+      }
+      
+      document.addEventListener('click', (e) => {
+          if (userMenuBtn && !userMenuBtn.contains(e.target)) {
+              userDropdown.classList.remove('active');
+          }
+      });
+
+      // دالة لعرض الإشعارات
+      window.showNotification = function(message, type = 'error') {
+          const container = document.getElementById('notification-container');
+          const toast = document.createElement('div');
+          toast.style.cssText = `background: white; border-left: 4px solid ${type === 'success' ? '#10b981' : '#e74c3c'}; padding: 15px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 14px; animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;`;
+          const iconColor = type === 'success' ? '#10b981' : '#e74c3c';
+          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="color:${iconColor}; font-size:18px;"></i><span style="color:#333;">${message}</span>`;
+          container.appendChild(toast);
+          setTimeout(() => {
+              toast.style.opacity = '0';
+              toast.style.transform = 'translateY(-20px)';
+              toast.style.transition = 'all 0.3s ease';
+              setTimeout(() => toast.remove(), 300);
+          }, 4000);
+      }
+
+      // إظهار وإخفاء الفورم
+      window.toggleSupportForm = function(show) {
+          const defaultView = document.getElementById('default-support-view');
+          const formContainer = document.getElementById('support-form-container');
+          
+          if (show) {
+              defaultView.style.display = 'none';
+              formContainer.classList.add('active');
+              
+              if(currentUser) {
+                  document.getElementById('support-email').value = currentUser.email;
+                  document.getElementById('guest-support-msg').style.display = 'none';
+                  document.getElementById('submit-support-btn').disabled = false;
+              } else {
+                  document.getElementById('support-email').value = '';
+                  document.getElementById('guest-support-msg').style.display = 'block';
+                  document.getElementById('submit-support-btn').disabled = true;
+              }
+          } else {
+              formContainer.classList.remove('active');
+              defaultView.style.display = 'block';
+              document.getElementById('support-message').value = '';
+          }
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            if(guestActions) guestActions.classList.add('auth-hidden');
+            if(userActions) userActions.classList.remove('auth-hidden');
+            
+            let dashUrl = "student-dashboard.html";
+            let photoUrl = user.photoURL;
+
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if(userDoc.exists()) {
+                    const data = userDoc.data();
+                    if(data.role === 'admin') dashUrl = "admin-dashboard.html";
+                    else if(data.role === 'instructor') dashUrl = "instructor-dashboard.html";
+                    if(data.profileImage) photoUrl = data.profileImage;
+                }
+            } catch(e) {}
+            
+            const fullName = user.displayName || "مستخدم";
+            if(headerProfileImg) {
+                headerProfileImg.src = photoUrl || `https://ui-avatars.com/api/?name=${fullName}&background=6D28D9&color=fff`;
+            }
+
+            if(dashboardLink) dashboardLink.href = dashUrl;
+            if(bottomNavAuthLink) bottomNavAuthLink.href = dashUrl;
+            if(bottomNavAuthText) bottomNavAuthText.textContent = "لوحتي";
+            
+        } else {
+            currentUser = null;
+            if(guestActions) guestActions.classList.remove('auth-hidden');
+            if(userActions) userActions.classList.add('auth-hidden');
+            if(bottomNavAuthLink) bottomNavAuthLink.href = "login.html";
+            if(bottomNavAuthText) bottomNavAuthText.textContent = "حسابي";
+        }
+      });
+
+      const handleLogout = async (e) => {
+          e.preventDefault();
+          try { await signOut(auth); window.location.href = "login.html"; } catch (error) { console.error(error); }
+      };
+      
+      if(document.getElementById('logout-btn')) document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+      // إرسال الرسالة إلى فايربيز
+      const supportForm = document.getElementById('support-form');
+      const submitBtn = document.getElementById('submit-support-btn');
+
+      supportForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (!currentUser) return;
+
+          const type = document.getElementById('support-type').value;
+          const message = document.getElementById('support-message').value.trim();
+          if (!message) return;
+
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+          submitBtn.disabled = true;
+
+          try {
+              await addDoc(collection(db, "support_requests"), {
+                  userId: currentUser.uid,
+                  userName: currentUser.displayName || "بدون اسم",
+                  userEmail: currentUser.email,
+                  message: message,
+                  type: type, 
+                  status: "new",
+                  createdAt: serverTimestamp()
+              });
+
+              window.showNotification("تم إرسال طلبك للإدارة بنجاح، سيتم الرد عليك قريباً.", "success");
+              window.toggleSupportForm(false); 
+          } catch (error) {
+              console.error("Error sending support message:", error);
+              window.showNotification("حدث خطأ أثناء الإرسال، تأكد من اتصالك بالإنترنت.", "error");
+          } finally {
+              submitBtn.innerHTML = originalText;
+              submitBtn.disabled = false;
+          }
+      });
+    </script>
+    <style>
+        @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</body>
+</html>

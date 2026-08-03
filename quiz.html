@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار المادة - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="student-dashboard.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- روح التطبيق (Native App Feel) --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+
+        /* --- تأثير Glassmorphism للواجهة الأساسية --- */
+        .main-header {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .quiz-sidebar, .question-card, .timer-card, .question-navigator, .curriculum-sidebar {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .timer-card { padding: 20px; text-align: center; }
+        .timer-display { font-size: 24px; font-weight: bold; color: var(--primary-color); display: flex; align-items: center; justify-content: center; gap: 10px;}
+        .question-navigator { padding: 20px; }
+        
+        /* تنسيقات خريطة الأسئلة (Glassy Circles) */
+        .questions-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center;}
+        .q-circle { 
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1); 
+            background: rgba(255,255,255,0.5); 
+            cursor: pointer; transition: 0.2s; 
+            font-family: 'Tajawal'; font-weight: bold; color: #555;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .q-circle:active { transform: scale(0.9); }
+        .q-circle.active { border-color: var(--primary-color); background: white; color: var(--primary-color); transform: scale(1.1); box-shadow: 0 4px 10px rgba(109,40,217,0.2);}
+        .q-circle.solved { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .q-circle.flagged { background-color: #f59e0b; color: white; border-color: #f59e0b; }
+        .navigator-legend { margin-top: 20px; display: flex; justify-content: center; gap: 15px; font-size: 12px; font-weight: bold; color: #555; }
+        .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 5px; }
+        .dot.active { background: white; border: 2px solid var(--primary-color); }
+        .dot.solved { background: var(--primary-color); }
+        .dot.flagged { background: #f59e0b; }
+        
+        /* تنسيقات كارت السؤال */
+        .question-card { padding: 30px; }
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 15px;}
+        .q-number { font-size: 18px; font-weight: 800; color: var(--primary-color); }
+        .btn-tool { background: rgba(245, 158, 11, 0.1); color: #d97706; border: none; padding: 8px 15px; border-radius: 12px; cursor: pointer; font-family: 'Tajawal'; font-weight: bold; transition: 0.2s; }
+        .btn-tool:active { transform: scale(0.95); }
+        .question-text h3 { font-size: 20px; line-height: 1.6; color: #222; margin-bottom: 30px; }
+
+        /* خيارات الإجابة (iOS Style Buttons) */
+        .answer-option {
+            display: flex; align-items: center;
+            background: rgba(255,255,255,0.6);
+            border: 2px solid transparent;
+            padding: 15px 20px; margin-bottom: 15px;
+            border-radius: 16px; cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .answer-option:hover { background: rgba(255,255,255,0.9); }
+        .answer-option:active { transform: scale(0.98); }
+        .answer-option input { display: none; }
+        .option-letter {
+            background: rgba(0,0,0,0.05); color: #555;
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; margin-left: 15px; flex-shrink: 0;
+        }
+        .option-text { font-size: 16px; color: #333; font-weight: 500; }
+        
+        /* تأثير اختيار الإجابة */
+        .answer-option.selected {
+            background: rgba(255,255,255,0.9);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(109, 40, 217, 0.15);
+        }
+        .answer-option.selected .option-letter {
+            background: var(--primary-color); color: white;
+        }
+
+        .quiz-footer-actions { display: flex; justify-content: space-between; margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px; gap: 10px; flex-wrap: wrap;}
+        .quiz-footer-actions .btn { border-radius: 12px; padding: 12px 25px; font-weight: bold; }
+        
+        /* شاشة النتيجة (Glassmorphism) */
+        .result-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 10000;
+            display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+        }
+        .result-card {
+            background: rgba(255, 255, 255, 0.95); padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center; max-width: 600px; width: 100%; border: 1px solid rgba(255,255,255,0.8);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .score-circle {
+            width: 130px; height: 130px; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center;
+            font-size: 36px; font-weight: 800; color: white; margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .score-success { background: linear-gradient(135deg, #34d399, #10b981); }
+        .score-fail { background: linear-gradient(135deg, #f87171, #ef4444); }
+
+        /* منطقة مراجعة الأخطاء */
+        .quiz-review-area { margin-top: 30px; text-align: right; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px; }
+        .review-item { background: rgba(239, 68, 68, 0.05); padding: 15px; margin-bottom: 15px; border-radius: 12px; border-right: 4px solid #ef4444; }
+        .review-q-text { font-weight: bold; font-size: 15px; margin-bottom: 10px; color: #222;}
+        .review-badges { font-size: 13px; display: flex; flex-direction: column; gap: 8px; }
+        .badge-wrong { color: #ef4444; }
+        .badge-correct { color: #10b981; font-weight: bold; }
+
+        /* --- Custom Modal (Glassmorphism) --- */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 11000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .custom-modal-box {
+            background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 20px; width: 90%; max-width: 400px;
+            text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); animation: popIn 0.3s ease;
+        }
+        .modal-icon { font-size: 50px; color: #f59e0b; margin-bottom: 15px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; margin-top: 25px; }
+        .btn-modal-cancel { background: rgba(0,0,0,0.05); color: #333; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Tajawal'; flex:1;}
+        .btn-modal-confirm { background: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Tajawal'; flex:1;}
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Layout Grid */
+        .quiz-layout-grid { display: grid; grid-template-columns: 300px 1fr; gap: 30px; margin-top: 30px; align-items: start;}
+        
+        .user-header-profile { display: flex; align-items: center; gap: 15px; }
+        .user-info-trigger { display: flex; align-items: center; gap: 10px; }
+        #header-profile-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .quiz-header-info { text-align: center; font-weight: 800; color: var(--primary-color); font-size: 18px;}
+
+        @media (max-width: 992px) {
+            .quiz-layout-grid { grid-template-columns: 1fr; }
+            .quiz-sidebar { order: 2; }
+            .quiz-main { order: 1; }
+            .quiz-header-info { display: none; }
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <div id="confirm-modal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="modal-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <h3 style="margin: 0; color: #222;">هل أنت متأكد من إنهاء الاختبار؟</h3>
+            <p style="color:#666; font-size:14px; margin-top:10px; line-height: 1.5;">بمجرد الإنهاء سيتم احتساب النتيجة ولن يمكنك التعديل على إجاباتك.</p>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" id="cancel-finish">تراجع</button>
+                <button class="btn-modal-confirm" id="confirm-finish">نعم، إنهاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-overlay" class="result-overlay">
+        <div class="result-card">
+            <div id="score-circle" class="score-circle">0%</div>
+            <h2 id="result-title" style="margin-bottom: 10px; color: #222;">...</h2>
+            <p id="result-message" style="color: #555; font-size: 16px; margin-bottom: 25px;">...</p>
+            
+            <div id="quiz-review-container" class="quiz-review-area" style="display: none;">
+                <h4 style="margin-bottom:15px; color: #333;">مراجعة الإجابات الخاطئة:</h4>
+                <div id="review-list"></div>
+            </div>
+
+            <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
+                <button id="finish-btn" class="btn btn-primary" style="display:none; border-radius: 12px; padding: 15px; font-size: 16px;">الانتقال للدرس التالي</button>
+                <button id="retry-btn" class="btn btn-secondary" style="display:none; border-radius: 12px; padding: 15px; font-size: 16px;">إعادة الاختبار</button>
+                <a href="#" id="back-to-course-btn" class="btn btn-light" style="border-radius: 12px; padding: 15px; background: rgba(0,0,0,0.05); color: #333; font-weight: bold;">العودة للمادة</a>
+            </div>
+        </div>
+    </div>
+
+    <header class="main-header">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <div class="quiz-header-info">
+                <span class="quiz-course-name" id="course-title-display">جاري التحميل...</span>
+            </div>
+            <div class="user-header-profile" id="user-header-profile">
+                <div class="user-info-trigger">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="User" id="header-profile-img">
+                    <span id="header-user-name" style="font-weight: bold; color: #333;">...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="quiz-container">
+        <div class="container">
+            <div class="quiz-layout-grid">
+                
+                <aside class="quiz-sidebar">
+                    <div class="timer-card">
+                        <h3 style="margin-top: 0; color: #333; font-size: 16px;">الوقت المتبقي</h3>
+                        <div class="timer-display" id="quiz-timer">
+                            <i class="fas fa-stopwatch"></i>
+                            <span id="timer-text">--:--</span>
+                        </div>
+                    </div>
+
+                    <div class="question-navigator">
+                        <h3 style="margin-top: 0; color: #333; font-size: 16px; text-align: center;">خريطة الأسئلة</h3>
+                        <div class="questions-grid" id="questions-map"></div>
+                        <div class="navigator-legend">
+                            <span><span class="dot solved"></span> مُجاب</span>
+                            <span><span class="dot active"></span> حالي</span>
+                            <span><span class="dot flagged"></span> مؤجل</span>
+                        </div>
+                    </div>
+
+                    <div class="curriculum-sidebar" style="padding:20px;">
+                        <h4 style="margin:0 0 15px 0; font-size:16px; color:#333; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">دروس المادة</h4>
+                        <div id="sidebar-lessons-list" style="max-height: 300px; overflow-y:auto; padding-right: 5px;">
+                            <!-- سيتم حقن الدروس هنا -->
+                        </div>
+                    </div>
+                </aside>
+
+                <main class="quiz-main">
+                    <div class="question-card">
+                        <div class="question-header">
+                            <span class="q-number" id="question-counter">السؤال 1 من --</span>
+                            <div class="q-tools">
+                                <button class="btn-tool" id="flag-btn" title="تأجيل السؤال"><i class="far fa-flag"></i> تأجيل للمراجعة</button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-text">
+                            <h3 id="question-text-display">...</h3>
+                        </div>
+
+                        <div class="answers-list" id="answers-container">
+                            <!-- خيارات الإجابة ستُحقن هنا -->
+                        </div>
+
+                        <div class="quiz-footer-actions">
+                            <button class="btn btn-secondary" id="prev-btn" disabled style="background: rgba(0,0,0,0.05); color: #333; border: none;">السابق</button>
+                            <button class="btn btn-success" id="trigger-finish-btn" style="display:none; background: #10b981; border: none;"><i class="fas fa-check-circle"></i> إنهاء الاختبار</button>
+                            <button class="btn btn-primary" id="next-btn" style="border: none;">التالي</button>
+                        </div>
+                    </div>
+                </main>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // ================================================================
+      // طبقة REST بديلة عن Firestore SDK مع دعم الـ Auth Token
+      // ================================================================
+      const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+
+      function toFirestoreValue(v) {
+          if (v === null || v === undefined) return { nullValue: null };
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+          if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+          if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+          return { stringValue: String(v) };
+      }
+
+      async function getRestHeaders() {
+          const headers = { 'Content-Type': 'application/json' };
+          if (auth.currentUser) {
+              try {
+                  const token = await auth.currentUser.getIdToken();
+                  if (token) {
+                      headers['Authorization'] = `Bearer ${token}`;
+                  }
+              } catch (e) { console.error("Error getting auth token:", e); }
+          }
+          return headers;
+      }
+
+      async function restGetDoc(path) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('REST Error');
+          const docJson = await res.json();
+          return firestoreFieldsToJs(docJson.fields || {});
+      }
+
+      async function restRunQuery(collectionId, filters, opts = {}) {
+          const fieldFilters = (filters || []).map(f => {
+              const op = f.op || 'EQUAL';
+              const value = op === 'IN' ? { arrayValue: { values: (f.value || []).map(toFirestoreValue) } } : toFirestoreValue(f.value);
+              return { fieldFilter: { field: { fieldPath: f.field }, op, value } };
+          });
+          let where = fieldFilters.length === 1 ? fieldFilters[0] : (fieldFilters.length > 1 ? { compositeFilter: { op: 'AND', filters: fieldFilters } } : undefined);
+
+          const structuredQuery = { from: [{ collectionId }] };
+          if (where) structuredQuery.where = where;
+          if (opts.orderByField) structuredQuery.orderBy = [{ field: { fieldPath: opts.orderByField }, direction: opts.orderByDir === 'desc' ? 'DESCENDING' : 'ASCENDING' }];
+          if (opts.limit) structuredQuery.limit = opts.limit;
+
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:runQuery?key=${firebaseConfig.apiKey}`, {
+              method: 'POST', headers: headers, body: JSON.stringify({ structuredQuery })
+          });
+          if (!res.ok) throw new Error('REST Query Error');
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const parts = row.document.name.split('/');
+              results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+
+      async function restCommit(writes) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:commit?key=${firebaseConfig.apiKey}`, {
+              method: 'POST', headers: headers, body: JSON.stringify({ writes })
+          });
+          if (!res.ok) throw new Error('REST Commit Error');
+          return res.json();
+      }
+
+      // Params
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('courseId');
+      const lessonIdParam = urlParams.get('lessonId'); 
+
+      if (!courseId || !lessonIdParam) window.location.href = 'student-dashboard.html';
+
+      // Global State
+      let currentUser = null;
+      let courseData = null; 
+      let questions = [];
+      let userAnswers = {}; 
+      let flaggedQuestions = new Set();
+      let currentQIndex = 0;
+      let enrollmentId = null;
+      let currentSectionIdx = 0;
+      let currentLessonIdx = 0;
+
+      // Elements
+      const qTextDisplay = document.getElementById('question-text-display');
+      const answersContainer = document.getElementById('answers-container');
+      const qCounter = document.getElementById('question-counter');
+      const qMap = document.getElementById('questions-map');
+      const timerDisplay = document.getElementById('timer-text');
+      
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const triggerFinishBtn = document.getElementById('trigger-finish-btn');
+      
+      // Modal Elements
+      const confirmModal = document.getElementById('confirm-modal');
+      const cancelFinishBtn = document.getElementById('cancel-finish');
+      const confirmFinishBtn = document.getElementById('confirm-finish');
+
+      onAuthStateChanged(auth, async (user) => {
+          if (user) {
+              currentUser = user;
+              updateHeader(user);
+              await loadQuizData(user.uid);
+          } else {
+              window.location.href = 'login.html';
+          }
+      });
+
+      function updateHeader(user) {
+          document.getElementById('header-user-name').textContent = user.displayName ? user.displayName.split(' ')[0] : "طالب";
+          if(user.photoURL) document.getElementById('header-profile-img').src = user.photoURL;
+      }
+
+      async function loadQuizData(userId) {
+          try {
+              courseData = await restGetDoc(`courses/${courseId}`);
+              if (!courseData) throw new Error("المادة غير موجودة");
+              
+              document.getElementById('course-title-display').textContent = `مادة: ${courseData.title}`;
+              document.getElementById('back-to-course-btn').href = `course-details.html?id=${courseId}`;
+
+              const [sIdx, lIdx] = lessonIdParam.split('-').map(Number);
+              currentSectionIdx = sIdx;
+              currentLessonIdx = lIdx;
+
+              const lesson = courseData.sections[sIdx].lessons[lIdx];
+              
+              if (!lesson || !lesson.questions || lesson.questions.length === 0) {
+                  alert("لا توجد أسئلة لهذا الاختبار!");
+                  window.location.href = `lesson-player.html?courseId=${courseId}`;
+                  return;
+              }
+
+              questions = lesson.questions;
+
+              const enrollments = await restRunQuery("enrollments", [
+                  { field: "studentId", value: userId },
+                  { field: "courseId", value: courseId }
+              ]);
+              if(enrollments.length > 0) enrollmentId = enrollments[0].id;
+
+              initQuizUI();
+              renderSidebarNav(); 
+              startTimer(15 * 60);
+
+          } catch (error) {
+              console.error(error);
+              alert("حدث خطأ في تحميل الاختبار");
+          }
+      }
+
+      function renderSidebarNav() {
+          const list = document.getElementById('sidebar-lessons-list');
+          list.innerHTML = '';
+          
+          courseData.sections.forEach((sec, sIdx) => {
+              sec.lessons.forEach((les, lIdx) => {
+                  const div = document.createElement('div');
+                  div.style.padding = "10px 15px";
+                  div.style.borderBottom = "1px solid rgba(0,0,0,0.05)";
+                  div.style.fontSize = "13px";
+                  div.style.cursor = "pointer";
+                  div.style.borderRadius = "8px";
+                  div.style.marginBottom = "5px";
+                  div.style.transition = "0.2s";
+                  
+                  if(sIdx === currentSectionIdx && lIdx === currentLessonIdx) {
+                      div.style.backgroundColor = "rgba(255,255,255,0.7)";
+                      div.style.color = "var(--primary-color)";
+                      div.style.fontWeight = "bold";
+                  } else {
+                      div.style.color = "#555";
+                  }
+
+                  const icon = les.type === 'quiz' ? 'fa-clipboard-list' : 'fa-play-circle';
+                  div.innerHTML = `<i class="fas ${icon}"></i> ${les.title}`;
+                  
+                  div.onclick = () => {
+                      if(confirm("هل تريد مغادرة الاختبار؟ سيتم فقدان تقدمك الحالي.")) {
+                          if(les.type === 'quiz') {
+                              window.location.href = `quiz.html?courseId=${courseId}&lessonId=${sIdx}-${lIdx}`;
+                          } else {
+                              window.location.href = `lesson-player.html?courseId=${courseId}&lessonId=${sIdx}-${lIdx}`;
+                          }
+                      }
+                  };
+                  
+                  div.onmouseover = () => { if(!(sIdx === currentSectionIdx && lIdx === currentLessonIdx)) div.style.backgroundColor = "rgba(255,255,255,0.4)"; }
+                  div.onmouseout = () => { if(!(sIdx === currentSectionIdx && lIdx === currentLessonIdx)) div.style.backgroundColor = "transparent"; }
+
+                  list.appendChild(div);
+              });
+          });
+      }
+
+      function initQuizUI() {
+          qMap.innerHTML = '';
+          questions.forEach((_, idx) => {
+              const btn = document.createElement('div');
+              btn.className = 'q-circle';
+              btn.textContent = idx + 1;
+              btn.onclick = () => loadQuestion(idx);
+              btn.id = `q-dot-${idx}`;
+              qMap.appendChild(btn);
+          });
+          loadQuestion(0);
+      }
+
+      function loadQuestion(index) {
+          currentQIndex = index;
+          const question = questions[index];
+
+          qCounter.textContent = `السؤال ${index + 1} من ${questions.length}`;
+          qTextDisplay.textContent = question.text;
+
+          answersContainer.innerHTML = '';
+          question.options.forEach((optText, optIdx) => {
+              const isChecked = userAnswers[index] === optIdx;
+              
+              const label = document.createElement('label');
+              label.className = `answer-option ${isChecked ? 'selected' : ''}`;
+              
+              label.innerHTML = `
+                  <input type="radio" name="q_option" value="${optIdx}" ${isChecked ? 'checked' : ''}>
+                  <span class="option-letter">${String.fromCharCode(65 + optIdx)}</span>
+                  <span class="option-text">${optText}</span>
+              `;
+              
+              label.querySelector('input').addEventListener('change', () => {
+                  userAnswers[index] = optIdx;
+                  updateMapUI();
+                  loadQuestion(currentQIndex); 
+              });
+              
+              answersContainer.appendChild(label);
+          });
+
+          prevBtn.disabled = (index === 0);
+          if (index === questions.length - 1) {
+              nextBtn.style.display = 'none';
+              triggerFinishBtn.style.display = 'inline-block';
+          } else {
+              nextBtn.style.display = 'inline-block';
+              triggerFinishBtn.style.display = 'none';
+          }
+          updateMapUI();
+      }
+
+      function updateMapUI() {
+          for (let i = 0; i < questions.length; i++) {
+              const dot = document.getElementById(`q-dot-${i}`);
+              dot.className = 'q-circle';
+              if (i === currentQIndex) dot.classList.add('active');
+              if (userAnswers[i] !== undefined) dot.classList.add('solved');
+              if (flaggedQuestions.has(i)) dot.classList.add('flagged');
+          }
+      }
+
+      nextBtn.onclick = () => { if(currentQIndex < questions.length - 1) loadQuestion(currentQIndex + 1); };
+      prevBtn.onclick = () => { if(currentQIndex > 0) loadQuestion(currentQIndex - 1); };
+      
+      document.getElementById('flag-btn').onclick = () => {
+          if (flaggedQuestions.has(currentQIndex)) {
+              flaggedQuestions.delete(currentQIndex);
+              document.getElementById('flag-btn').style.background = "rgba(245, 158, 11, 0.1)";
+              document.getElementById('flag-btn').style.color = "#d97706";
+          } else {
+              flaggedQuestions.add(currentQIndex);
+              document.getElementById('flag-btn').style.background = "#f59e0b";
+              document.getElementById('flag-btn').style.color = "white";
+          }
+          updateMapUI();
+      };
+
+      triggerFinishBtn.onclick = () => confirmModal.style.display = 'flex';
+      cancelFinishBtn.onclick = () => confirmModal.style.display = 'none';
+      confirmFinishBtn.onclick = () => {
+          confirmModal.style.display = 'none';
+          calculateResult();
+      };
+
+      async function calculateResult() {
+          let correctCount = 0;
+          let wrongQuestions = []; 
+
+          questions.forEach((q, idx) => {
+              const userAns = parseInt(userAnswers[idx]);
+              const correctAns = parseInt(q.correctIndex);
+              
+              if (userAns === correctAns) {
+                  correctCount++;
+              } else {
+                  wrongQuestions.push({
+                      qText: q.text,
+                      userChoice: q.options[userAns] || "لم يتم الإجابة",
+                      correctChoice: q.options[correctAns]
+                  });
+              }
+          });
+
+          const percentage = Math.round((correctCount / questions.length) * 100);
+          const isPassed = percentage >= 50;
+
+          document.getElementById('result-overlay').style.display = 'flex';
+          const circle = document.getElementById('score-circle');
+          const title = document.getElementById('result-title');
+          const msg = document.getElementById('result-message');
+          const finishBtn = document.getElementById('finish-btn');
+          const retryBtn = document.getElementById('retry-btn');
+          const reviewContainer = document.getElementById('quiz-review-container');
+          const reviewList = document.getElementById('review-list');
+
+          circle.textContent = `${percentage}%`;
+          
+          if (isPassed) {
+              circle.className = "score-circle score-success";
+              title.textContent = "ناجح! 🎉";
+              msg.textContent = `أحسنت! نتيجتك تؤهلك للدرس التالي في المادة.`;
+              finishBtn.style.display = "inline-block";
+              retryBtn.style.display = "none";
+              reviewContainer.style.display = "none"; 
+
+              if (enrollmentId) {
+                  const lessonTitle = courseData.sections[currentSectionIdx].lessons[currentLessonIdx].title;
+                  
+                  const write = {
+                      update: { 
+                          name: `projects/${firebaseConfig.projectId}/databases/(default)/documents/enrollments/${enrollmentId}`, 
+                          fields: { courseId: { stringValue: courseId } } 
+                      },
+                      updateMask: { fieldPaths: ["courseId"] },
+                      updateTransforms: [
+                          { fieldPath: "completedLessons", appendMissingElements: { values: [{ stringValue: lessonTitle }] } }
+                      ]
+                  };
+                  await restCommit([write]);
+              }
+              
+              const nextLessonInfo = getNextLessonInfo();
+              if (nextLessonInfo) {
+                  finishBtn.textContent = "الدرس التالي: " + nextLessonInfo.title;
+                  finishBtn.onclick = () => {
+                      if(nextLessonInfo.type === 'quiz') {
+                          window.location.href = `quiz.html?courseId=${courseId}&lessonId=${nextLessonInfo.id}`;
+                      } else {
+                          window.location.href = `lesson-player.html?courseId=${courseId}&lessonId=${nextLessonInfo.id}`;
+                      }
+                  };
+              } else {
+                  finishBtn.textContent = "إنهاء المادة والعودة";
+                  finishBtn.onclick = () => window.location.href = `course-details.html?id=${courseId}`;
+              }
+
+          } else {
+              circle.className = "score-circle score-fail";
+              title.textContent = "لم تجتز الاختبار";
+              msg.textContent = "يجب الحصول على 50% على الأقل للمرور للدرس التالي.";
+              finishBtn.style.display = "none";
+              retryBtn.style.display = "inline-block";
+              retryBtn.onclick = () => window.location.reload();
+
+              if(wrongQuestions.length > 0) {
+                  reviewContainer.style.display = "block";
+                  reviewList.innerHTML = "";
+                  wrongQuestions.forEach(wrong => {
+                      const item = document.createElement('div');
+                      item.className = 'review-item';
+                      item.innerHTML = `
+                          <div class="review-q-text">${wrong.qText}</div>
+                          <div class="review-badges">
+                              <span class="badge-wrong"><i class="fas fa-times-circle"></i> إجابتك: ${wrong.userChoice}</span>
+                              <span class="badge-correct"><i class="fas fa-check-circle"></i> الإجابة الصحيحة: ${wrong.correctChoice}</span>
+                          </div>
+                      `;
+                      reviewList.appendChild(item);
+                  });
+              }
+          }
+      }
+
+      function getNextLessonInfo() {
+          const sections = courseData.sections;
+          if (currentLessonIdx < sections[currentSectionIdx].lessons.length - 1) {
+              const nextL = sections[currentSectionIdx].lessons[currentLessonIdx + 1];
+              return { id: `${currentSectionIdx}-${currentLessonIdx + 1}`, title: nextL.title, type: nextL.type };
+          }
+          else if (currentSectionIdx < sections.length - 1) {
+              const nextSec = sections[currentSectionIdx + 1];
+              if (nextSec.lessons.length > 0) {
+                  const nextL = nextSec.lessons[0];
+                  return { id: `${currentSectionIdx + 1}-0`, title: nextL.title, type: nextL.type };
+              }
+          }
+          return null; 
+      }
+
+      function startTimer(duration) {
+          let timer = duration, minutes, seconds;
+          const interval = setInterval(() => {
+              minutes = parseInt(timer / 60, 10);
+              seconds = parseInt(timer % 60, 10);
+              minutes = minutes < 10 ? "0" + minutes : minutes;
+              seconds = seconds < 10 ? "0" + seconds : seconds;
+              timerDisplay.textContent = minutes + ":" + seconds;
+              if (--timer < 0) {
+                  clearInterval(interval);
+                  alert("انتهى الوقت!");
+                  calculateResult();
+              }
+          }, 1000);
+      }
+
+    </script>
+</body>
+</html>

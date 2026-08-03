@@ -1,0 +1,727 @@
+/* ================================================================ */
+/* ================= Styles for Student Dashboard ================= */
+/* ================================================================ */
+
+.dashboard-body {
+    background-color: #f4f6f8;
+}
+
+/* --- Header User Profile --- */
+.user-header-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-light);
+}
+.notification-bell .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #e74c3c;
+    color: white;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.user-info-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.user-info-trigger img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+}
+.user-info-trigger span {
+    font-weight: 700;
+    font-size: 14px;
+}
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    background-color: white;
+    box-shadow: var(--shadow);
+    border-radius: var(--border-radius);
+    width: 200px;
+    padding: 10px 0;
+    z-index: 100;
+}
+.user-dropdown.active {
+    display: block;
+}
+.user-dropdown a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+.user-dropdown a:hover {
+    background-color: var(--secondary-color);
+}
+.user-dropdown hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 5px 0;
+}
+.user-dropdown .logout-link {
+    color: #e74c3c;
+}
+
+/* --- Dashboard Layout --- */
+.dashboard-container {
+    padding: 40px 0;
+}
+.dashboard-layout {
+    display: flex;
+    gap: 30px;
+}
+
+/* --- Sidebar --- */
+.dashboard-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 30px 20px;
+    height: fit-content;
+}
+.user-sidebar-info {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.user-sidebar-info img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+.user-sidebar-info h3 { margin: 0 0 5px 0; font-size: 20px; }
+.user-sidebar-info p { margin: 0; color: var(--text-light); font-size: 14px; }
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--text-light);
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+.sidebar-menu a i {
+    margin-left: 10px;
+    width: 20px;
+}
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+/* --- Dashboard Main --- */
+.dashboard-main {
+    flex-grow: 1;
+}
+
+/* Stats Cards */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+.stat-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+.icon-box.purple { background-color: #f3e8ff; color: var(--primary-color); }
+.icon-box.green { background-color: #dcfce7; color: #10b981; }
+.icon-box.gold { background-color: #fef3c7; color: #f59e0b; }
+
+.stat-info h4 { font-size: 24px; margin: 0; }
+.stat-info p { margin: 0; color: var(--text-light); font-size: 14px; }
+
+/* My Courses Grid */
+.section-title-small {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+.my-courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+.dashboard-course-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s;
+    border: 1px solid transparent;
+}
+.dashboard-course-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-color);
+}
+.card-image {
+    position: relative;
+    height: 160px;
+}
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.status-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+}
+.status-badge.in-progress { background-color: var(--primary-color); }
+.status-badge.completed { background-color: #10b981; }
+
+.card-content {
+    padding: 20px;
+}
+.card-content h3 {
+    font-size: 18px;
+    margin: 0 0 15px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.progress-info {
+    margin-bottom: 20px;
+}
+.progress-bar-bg {
+    height: 6px;
+    background-color: var(--secondary-color);
+    border-radius: 3px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+.progress-info span {
+    font-size: 13px;
+    color: var(--text-light);
+}
+.dashboard-course-card .btn {
+    width: 100%;
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 992px) {
+    .dashboard-layout {
+        flex-direction: column;
+    }
+    .dashboard-sidebar {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    .user-header-profile span {
+        display: none; /* إخفاء اسم المستخدم في الموبايل لتوفير المساحة */
+    }
+}
+/* ================================================================ */
+/* ================= Styles for Quiz Page ========================= */
+/* ================================================================ */
+
+/* --- Quiz Specific Header --- */
+.quiz-header-info {
+    background-color: var(--secondary-color);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* --- Quiz Layout --- */
+.quiz-container {
+    padding: 40px 0;
+}
+.quiz-layout-grid {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* --- Sidebar (Timer & Nav) --- */
+.quiz-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+}
+.timer-card, .question-navigator {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.timer-card h3, .question-navigator h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+.timer-display {
+    font-size: 32px;
+    font-weight: 800;
+    color: #e74c3c; /* Red for urgency */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Question Navigator Grid */
+.questions-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.q-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.q-circle:hover {
+    background-color: var(--secondary-color);
+}
+.q-circle.solved {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+.q-circle.active {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+.q-circle.flagged {
+    background-color: #f39c12;
+    color: white;
+    border-color: #f39c12;
+}
+.navigator-legend {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    font-size: 12px;
+    color: var(--text-light);
+}
+.navigator-legend .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 5px;
+}
+.dot.solved { background-color: var(--primary-color); }
+.dot.active { border: 2px solid var(--primary-color); }
+.dot.flagged { background-color: #f39c12; }
+
+
+/* --- Main Question Area --- */
+.quiz-main {
+    flex-grow: 1;
+}
+.question-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--text-light);
+}
+.btn-tool {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-family: var(--font-family);
+}
+.btn-tool:hover { color: #f39c12; }
+
+.question-text h3 {
+    font-size: 22px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+/* Answer Options */
+.answers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+.answer-option {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.answer-option:hover {
+    background-color: var(--secondary-color);
+}
+.answer-option input[type="radio"] {
+    display: none; /* Hide default radio */
+}
+/* Style when selected */
+.answer-option:has(input:checked) {
+    border-color: var(--primary-color);
+    background-color: #f3e8ff; /* Light purple */
+}
+.option-letter {
+    width: 35px;
+    height: 35px;
+    background-color: var(--secondary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-left: 15px;
+}
+.answer-option:has(input:checked) .option-letter {
+    background-color: var(--primary-color);
+    color: white;
+}
+.option-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.quiz-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 992px) {
+    .quiz-layout-grid {
+        flex-direction: column-reverse; /* Put question first, then timer below */
+    }
+    .quiz-sidebar {
+        width: 100%;
+        display: flex;
+        gap: 15px;
+    }
+    .timer-card, .question-navigator {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    .questions-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    .q-circle {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+    }
+}
+@media (max-width: 600px) {
+    .quiz-sidebar {
+        flex-direction: column;
+    }
+}
+/* ================================================================ */
+/* =========== (جديد) Styles for Certificates Page ================ */
+/* ================================================================ */
+
+.dashboard-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-filter-box {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 300px;
+}
+.search-filter-box input {
+    border: none;
+    padding: 10px 15px;
+    width: 100%;
+    outline: none;
+    font-family: var(--font-family);
+}
+.search-filter-box button {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+/* Certificates Grid */
+.certificates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.certificate-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+.certificate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.cert-preview {
+    height: 180px;
+    background-color: #f0f4f8;
+    background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23dce4eb' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.cert-icon {
+    font-size: 60px;
+    color: #d1d5db;
+}
+.cert-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.certificate-card:hover .cert-overlay {
+    opacity: 1;
+}
+.btn-light {
+    background-color: white;
+    color: var(--text-dark);
+    border: none;
+}
+.btn-light:hover {
+    background-color: #f8f9fa;
+}
+
+.cert-info {
+    padding: 20px;
+}
+.cert-info h3 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: var(--text-dark);
+}
+.cert-date, .cert-id {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.cert-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+.cert-actions .btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .search-filter-box {
+        width: 100%;
+    }
+}
+/* ================================================================ */
+/* =========== (جديد) Styles for Profile Settings Page ============ */
+/* ================================================================ */
+
+.settings-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+.settings-card h3 {
+    margin: 0 0 25px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 18px;
+    color: var(--text-dark);
+}
+
+/* Profile Upload Section */
+.profile-upload-section {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+.current-photo img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--secondary-color);
+}
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.upload-btn-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+.upload-hint {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+/* Form Styles */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+.form-control:disabled {
+    background-color: #f9fafb;
+    color: var(--text-light);
+    cursor: not-allowed;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .profile-upload-section {
+        flex-direction: column;
+        text-align: center;
+    }
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    .form-actions button {
+        width: 100%;
+    }
+}

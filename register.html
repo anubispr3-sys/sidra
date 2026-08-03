@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>إنشاء حساب جديد - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- التعديل 2: روح التطبيق الأصلي (Native App Feel) --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            /* خلفية متدرجة ناعمة لإبراز تأثير الضبابية والشفافية */
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        
+        /* السماح بالكتابة داخل حقول الفورم فقط */
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .user-area { display: flex; align-items: center; gap: 15px; }
+        .user-welcome { font-weight: bold; color: #333; font-size: 14px; }
+
+        /* --- تأثير Glassmorphism (شفافية وضبابية وبدون حواف) --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .auth-section {
+            background: transparent !important; /* إزالة لون الخلفية الأصلي */
+        }
+
+        .auth-form-container {
+            background: rgba(255, 255, 255, 0.4) !important; /* شفافية أعلى للصندوق */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important; /* حافة زجاجية وهمية */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1) !important;
+            border-radius: 24px !important;
+        }
+
+        /* حقول إدخال بدون حواف مع تأثير زجاجي */
+        .form-group input {
+            background: rgba(255, 255, 255, 0.5) !important;
+            border: none !important; /* إزالة الحواف تماماً */
+            border-radius: 16px !important;
+            padding: 16px 20px !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+            color: #111827 !important;
+        }
+        
+        .form-group input:focus {
+            background: rgba(255, 255, 255, 0.8) !important;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.3) !important; /* إطار لوني عند الكتابة فقط */
+        }
+
+        .btn-primary {
+            background: rgba(109, 40, 217, 0.85) !important;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: none !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 20px rgba(109, 40, 217, 0.2) !important;
+        }
+
+        /* ضبط مساحات الموبايل للشريط السفلي وإخفاء الهيدر القديم */
+        @media (max-width: 992px) {
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .guest-actions, .mobile-menu-toggle { display: none !important; }
+            .main-footer { display: none; } /* إخفاء الفوتر في الموبايل لتعزيز شكل التطبيق */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="courses.html">المكتبة</a>
+                <a href="about.html">من نحن</a>
+                <a href="contact.html">اتصل بنا</a>
+            </nav>
+            <div class="header-actions">
+                <div id="guest-actions" class="guest-actions">
+                    <a href="login.html" class="btn btn-secondary">تسجيل الدخول</a>
+                    <a href="register.html" class="btn btn-primary">حساب جديد</a>
+                </div>
+                <div id="user-actions" class="user-area auth-hidden">
+                    <span class="user-welcome" id="user-name-display"></span>
+                    <a href="index.html" class="btn btn-primary">الصفحة الرئيسية</a>
+                </div>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-form-container">
+                <h2>إنشاء حساب جديد</h2>
+                <p class="auth-subtitle">انضم إلينا اليوم وابدأ رحلتك التعليمية.</p>
+
+                <form class="auth-form" id="signup-form">
+                    <div class="user-type-toggle ios-hidden">
+                        <label class="user-type-label active" onclick="document.querySelectorAll('.user-type-label').forEach(l=>l.classList.remove('active')); this.classList.add('active');">
+                            <input type="radio" name="user_type" value="student" checked>
+                            <i class="fas fa-user-graduate"></i> أنا طالب
+                        </label>
+                        <label class="user-type-label" onclick="document.querySelectorAll('.user-type-label').forEach(l=>l.classList.remove('active')); this.classList.add('active');">
+                            <input type="radio" name="user_type" value="instructor">
+                            <i class="fas fa-chalkboard-teacher"></i> أنا دكتور
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fullname" style="display:none;">الاسم بالكامل</label>
+                        <input type="text" id="fullname" name="fullname" placeholder="الاسم بالكامل" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" style="display:none;">البريد الإلكتروني</label>
+                        <input type="email" id="email" name="email" placeholder="البريد الإلكتروني" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" style="display:none;">كلمة المرور</label>
+                        <input type="password" id="password" name="password" placeholder="كلمة المرور" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password" style="display:none;">تأكيد كلمة المرور</label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="تأكيد كلمة المرور" required>
+                    </div>
+
+                    <div class="form-group terms">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">أوافق على <a href="privacy-policy.html">شروط الاستخدام</a> و <a href="privacy-policy.html">سياسة الخصوصية</a></label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-fullwidth">إنشاء الحساب</button>
+                </form>
+
+                <div class="auth-switch">
+                    <p>لديك حساب بالفعل؟ <a href="login.html">سجل الدخول</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">Sidra Academy</h3>
+                    <p>منصة تعليمية تهدف لتمكين الأفراد من خلال توفير محتوى عربي عالي الجودة.</p>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">روابط سريعة</h3>
+                    <ul>
+                        <li><a href="courses.html">تصفح المكتبة</a></li>
+                        <li class="ios-hidden"><a href="#">كن دكتوراً معنا</a></li>
+                    </ul>
+                </div>
+                 <div class="footer-col">
+                    <h3 class="footer-title">تواصل معنا</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="login.html" class="nav-item active" id="bottom-nav-auth-link">
+            <i class="fas fa-user-circle"></i>
+            <span id="bottom-nav-auth-text">دخول</span>
+        </a>
+    </nav>
+    
+    <script src="script.js"></script>
+
+    <div id="notification-container"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        // التعديل: استيراد تهيئة الـ Auth والتخزين المحلي المدعوم
+        import { initializeAuth, browserLocalPersistence, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+            authDomain: "sidra-855f2.firebaseapp.com",
+            projectId: "sidra-855f2",
+            storageBucket: "sidra-855f2.firebasestorage.app",
+            messagingSenderId: "724377690776",
+            appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+            measurementId: "G-WD5BZ4S0S4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        // التعديل: فرض استخدام الـ LocalStorage المدعوم في iOS
+        const auth = initializeAuth(app, {
+            persistence: browserLocalPersistence
+        });
+
+        // ================================================================
+        // طبقة REST بديلة عن Firestore SDK مع دعم الـ Auth Token
+        // ================================================================
+        const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+        function firestoreValueToJs(value) {
+            if (!value) return null;
+            if ('stringValue' in value) return value.stringValue;
+            if ('integerValue' in value) return parseInt(value.integerValue, 10);
+            if ('doubleValue' in value) return value.doubleValue;
+            if ('booleanValue' in value) return value.booleanValue;
+            if ('nullValue' in value) return null;
+            if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+            if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+            if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+            return null;
+        }
+
+        function firestoreFieldsToJs(fields) {
+            const out = {};
+            for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+            return out;
+        }
+
+        function toFirestoreValue(v) {
+            if (v === null || v === undefined) return { nullValue: null };
+            if (typeof v === 'boolean') return { booleanValue: v };
+            if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+            if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+            if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+            return { stringValue: String(v) };
+        }
+
+        function jsToFirestoreFields(obj) {
+            const fields = {};
+            for (const key in obj) fields[key] = toFirestoreValue(obj[key]);
+            return fields;
+        }
+
+        async function getRestHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (auth.currentUser) {
+                try {
+                    const token = await auth.currentUser.getIdToken();
+                    if (token) {
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+                } catch (e) { console.error("Error getting auth token:", e); }
+            }
+            return headers;
+        }
+
+        async function restGetDoc(path) {
+            const headers = await getRestHeaders();
+            const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error('REST Error');
+            const docJson = await res.json();
+            return firestoreFieldsToJs(docJson.fields || {});
+        }
+
+        async function restCommit(writes) {
+            const headers = await getRestHeaders();
+            const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:commit?key=${firebaseConfig.apiKey}`, {
+                method: 'POST', headers: headers, body: JSON.stringify({ writes })
+            });
+            if (!res.ok) throw new Error('REST Commit Error');
+            return res.json();
+        }
+        // ================================================================
+
+        let isManualSignup = false;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && !isManualSignup) {
+                try {
+                    const userData = await restGetDoc(`users/${user.uid}`);
+                    if (userData) {
+                        if (userData.status === 'active' && !userData.isBanned) {
+                            if (userData.role === 'instructor') window.location.replace("instructor-dashboard.html");
+                            else if (userData.role === 'admin') window.location.replace("admin-dashboard.html");
+                            else window.location.replace("student-dashboard.html");
+                        }
+                    }
+                } catch (error) {
+                    console.error("Auth check error:", error);
+                }
+            }
+        });
+
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('sidra_device_id');
+            if (!deviceId) {
+                deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('sidra_device_id', deviceId);
+            }
+            return deviceId;
+        }
+
+        function showNotification(message, type = 'error') {
+            const container = document.getElementById('notification-container') || createContainer();
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const iconColor = type === 'success' ? '#10b981' : '#e74c3c';
+            toast.style.cssText = `
+                background: white; border-left: 4px solid ${iconColor};
+                padding: 15px 20px; margin-top: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+                display: flex; align-items: center; gap: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 14px;
+                animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            `;
+            toast.innerHTML = `<i class="fas ${iconClass}" style="color:${iconColor}; font-size:18px;"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'fadeOutUp 0.4s ease forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        function createContainer() {
+            const div = document.createElement('div');
+            div.id = 'notification-container';
+            div.style.cssText = "position:fixed; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10002; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;";
+            document.body.appendChild(div);
+            return div;
+        }
+
+        const signupForm = document.getElementById('signup-form');
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            isManualSignup = true;
+            
+            const submitBtn = signupForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "جاري المعالجة...";
+            submitBtn.disabled = true;
+
+            const fullname = document.getElementById('fullname').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            const userTypeElement = document.querySelector('input[name="user_type"]:checked');
+            const userRole = userTypeElement ? userTypeElement.value : 'student';
+
+            if (password !== confirmPassword) {
+                showNotification("كلمة المرور غير متطابقة!", "error");
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+                isManualSignup = false;
+                return;
+            }
+
+            const currentDeviceId = getDeviceId();
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await updateProfile(user, { displayName: fullname });
+
+                let accountStatus = 'active';
+                if (userRole === 'instructor') {
+                    accountStatus = 'pending';
+                }
+
+                const write = {
+                    update: {
+                        name: `projects/${firebaseConfig.projectId}/databases/(default)/documents/users/${user.uid}`,
+                        fields: jsToFirestoreFields({
+                            uid: user.uid,
+                            name: fullname,
+                            email: email,
+                            role: userRole,
+                            status: accountStatus,
+                            trustedDeviceId: currentDeviceId,
+                            createdAt: new Date().toISOString(),
+                            phone: "",
+                            bio: ""
+                        })
+                    }
+                };
+
+                await restCommit([write]);
+
+                if (userRole === 'instructor') {
+                    showNotification("تم تسجيل طلبك كدكتور! بانتظار الموافقة.", "success");
+                    await signOut(auth);
+                    setTimeout(() => { window.location.replace("login.html"); }, 3000);
+                } else {
+                    showNotification("تم إنشاء الحساب بنجاح!", "success");
+                    setTimeout(() => { window.location.replace("student-dashboard.html"); }, 1500);
+                }
+
+            } catch (error) {
+                isManualSignup = false;
+                console.error("Signup error:", error);
+                let message = "حدث خطأ أثناء التسجيل.";
+                if (error.code === 'auth/email-already-in-use') message = "البريد الإلكتروني مستخدم بالفعل.";
+                else if (error.code === 'auth/weak-password') message = "كلمة المرور ضعيفة (6 أحرف على الأقل).";
+                
+                showNotification(message, "error");
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+    <style>
+        @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+    </style>
+</body>
+</html>

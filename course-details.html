@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>تفاصيل المادة - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- روح التطبيق الأصلي (Native App Feel) --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; } 
+        
+        /* --- تأثير Glassmorphism (شفافية وضبابية) --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .learning-box, .purchase-card {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+        }
+
+        /* --- تنسيقات محتوى المادة (Accordion) المحدثة --- */
+        .curriculum-module {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+            margin-bottom: 15px; /* مسافة بين الأقسام */
+            transition: all 0.3s ease;
+        }
+
+        .module-header {
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            padding: 18px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .module-header:hover {
+            background-color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        .curriculum-module.active .module-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+
+        .curriculum-module.active .module-header .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        
+        .module-content { 
+            background-color: transparent !important; 
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .curriculum-module.active .module-content {
+            max-height: 1000px; /* لفتح المحتوى بنعومة */
+        }
+
+        .lesson-item { 
+            border-bottom: 1px solid rgba(0,0,0,0.05) !important; 
+            padding: 15px 20px;
+            color: #444;
+        }
+        .lesson-item:last-child { border-bottom: none !important; }
+
+        /* --- تنسيقات قائمة المستخدم والإشعارات --- */
+        .user-header-profile { position: relative; cursor: pointer; display: flex; align-items: center; margin-right: auto; }
+        .user-header-profile img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color); padding: 2px; background-color: white; transition: 0.2s; }
+        .user-header-profile img:active { transform: scale(0.95); }
+        .user-dropdown, .notification-dropdown { display: none; position: absolute; top: 55px; left: 0; background: rgba(255, 255, 255, 0.95) !important; backdrop-filter: blur(25px); box-shadow: 0 15px 50px rgba(0,0,0,0.15); border-radius: 20px; z-index: 1000; flex-direction: column; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+        .user-dropdown { width: 180px; }
+        .user-dropdown.active, .notification-dropdown.active { display: flex; animation: fadeIn 0.2s ease; }
+        .user-dropdown a { padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; font-family: 'Tajawal'; font-size: 14px; display: flex; gap: 10px; align-items: center; font-weight: 600;}
+        .user-dropdown a:hover { background-color: rgba(255,255,255,0.6); color: var(--primary-color); }
+        .user-dropdown i { width: 15px; text-align: center; color: var(--text-light); }
+        .user-dropdown a:hover i { color: var(--primary-color); }
+        .user-dropdown .logout-link { color: #e74c3c; }
+        .user-dropdown .logout-link i { color: #e74c3c; }
+        .user-dropdown .logout-link:hover { background-color: #fdf2f2; color: #e74c3c; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+
+        /* --- Video Preview Styles --- */
+        .video-preview {
+            position: relative; width: 100%; aspect-ratio: 16 / 9;
+            border-radius: 20px 20px 0 0; overflow: hidden; background: #000; cursor: pointer;
+        }
+        .video-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .play-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); display: none; justify-content: center;
+            align-items: center; transition: 0.3s; z-index: 2;
+        }
+        .play-overlay:hover { background: rgba(0,0,0,0.2); }
+        .play-overlay i { font-size: 60px; color: white; opacity: 0.9; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+        .video-preview iframe { width: 100%; height: 100%; border: none; }
+
+        .course-title-bar {
+            background: rgba(17, 24, 39, 0.7) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .notification-bell { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 15px;}
+        .notification-bell i { font-size: 22px; color: #555; }
+        .notification-dropdown { top: 50px; left: -10px; width: 320px; }
+        .notif-header { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); background: #ffffff; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .notif-header span { font-size: 14px; }
+        .notif-count-label { background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .notif-list { max-height: 350px; overflow-y: auto; }
+        .notif-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: flex-start; gap: 12px; transition: 0.2s; background: transparent;}
+        .notif-item:hover { background: #f9fafb; }
+        .notif-item.unread { background-color: #f0f9ff; }
+        .notif-icon-box { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+        .type-info { background: #e0f2fe; color: #0284c7; }
+        .type-success { background: #dcfce7; color: #16a34a; }
+        .type-warning { background: #fef9c3; color: #ca8a04; }
+        .type-alert { background: #fee2e2; color: #dc2626; }
+        .notif-content h5 { margin: 0 0 5px; font-size: 14px; color: #333; }
+        .notif-content p { margin: 0 0 5px; font-size: 12px; color: #555; line-height: 1.4; }
+        .notif-time { font-size: 10px; color: #777; }
+        .badge { display: none; position: absolute; top: -5px; right: -8px; background: #e74c3c; color: white; border-radius: 50%; padding: 2px 5px; font-size: 10px; font-weight: bold; border: 2px solid white; } 
+
+        /* --- تصميم نافذة طلب الانضمام --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 10000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.active { display: flex; }
+        .payment-modal { 
+            background: rgba(255, 255, 255, 0.9); width: 90%; max-width: 400px;
+            border-radius: 20px; padding: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: relative; text-align: center; backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .close-modal-btn { position: absolute; top: 15px; left: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #555; transition: 0.2s; }
+        .close-modal-btn:hover { color: #e74c3c; }
+
+        @media (max-width: 992px) {
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .guest-actions, .mobile-menu-toggle { display: none !important; }
+            .course-details-main { order: 2; }
+            .purchase-sidebar { order: 1; position: static; width: 100%; margin-bottom: 30px; }
+            #mobile-guest-links { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px; }
+            .main-footer { display: none; }
+            .notification-bell { position: static; }
+            .notification-dropdown { position: fixed !important; top: 75px !important; left: 5% !important; width: 90% !important; max-width: none !important; z-index: 99999 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary-color);"></i>
+        <p style="margin-top: 15px; font-weight: bold; color: #333;">جاري تحميل التفاصيل...</p>
+    </div>
+
+    <!-- =====================================================================
+         صندوق تشخيص الأخطاء المؤقت
+    ===================================================================== -->
+    <div id="debug-error-box" style="display:none; position:fixed; bottom:0; left:0; right:0; max-height:45vh; overflow:auto; background:#1a1a1a; color:#ff6b6b; font-family:monospace; font-size:11px; line-height:1.5; padding:10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index:999999; direction:ltr; text-align:left; white-space:pre-wrap; border-top:3px solid #e74c3c;"></div>
+    <script>
+      (function () {
+        var box = document.getElementById('debug-error-box');
+        function showErr(msg) {
+          try {
+            console.error(msg);
+            box.style.display = 'block';
+            var line = document.createElement('div');
+            line.style.borderBottom = '1px solid #444';
+            line.style.padding = '4px 0';
+            line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+            box.appendChild(line);
+          } catch (e) {}
+        }
+        window.__showDebugErr = showErr;
+
+        window.addEventListener('error', function (e) {
+          var msg = e && e.message ? e.message : 'Unknown script error';
+          if (e && e.filename) msg += '  @ ' + e.filename + ':' + e.lineno;
+          showErr('window.onerror: ' + msg);
+        });
+
+        window.addEventListener('unhandledrejection', function (e) {
+          var reason = e && e.reason;
+          var msg = reason && (reason.stack || reason.message) ? (reason.stack || reason.message) : String(reason);
+          showErr('unhandledrejection: ' + msg);
+        });
+
+        setTimeout(function () {
+          var overlay = document.getElementById('loading-overlay');
+          if (overlay && overlay.style.display !== 'none') {
+            showErr('لسه في وضع التحميل بعد 12 ثانية. الاحتمالات: (1) مفيش إنترنت / الشبكة بطيئة، (2) فشل تحميل Firebase من gstatic.com، (3) سكريبت الموديول اتعلق أو حصل فيه استثناء قبل ما يوصل لكود إخفاء شاشة التحميل.');
+          }
+        }, 12000);
+      })();
+    </script>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="courses.html">المكتبة</a>
+                <a href="about.html">من نحن</a>
+            </nav>
+            <div class="header-actions">
+                <div class="guest-actions auth-hidden" id="guest-actions">
+                    <a href="login.html" class="btn btn-secondary">دخول</a>
+                    <a href="register.html" class="btn btn-primary" style="border-radius: 12px;">حساب جديد</a>
+                </div>
+
+                <div class="user-header-profile auth-hidden" id="user-actions">
+                    
+                    <div class="notification-bell" id="bell-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notif-badge" style="display: none;">0</span>
+                        <div class="notification-dropdown" id="notif-dropdown">
+                            <div class="notif-header">
+                                <span>الإشعارات</span>
+                                <span class="notif-count-label" id="dropdown-count">0 جديد</span>
+                            </div>
+                            <div class="notif-list" id="notif-list">
+                                <p style="text-align:center; padding:20px; color:#999; font-size:12px;">جاري التحميل...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="user-menu-btn">
+                        <img src="https://via.placeholder.com/150" alt="User" id="header-profile-img">
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <a href="#" id="dashboard-link"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+                        <a href="profile-settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+                        <hr style="margin: 0; border: 0; border-top: 1px solid rgba(0,0,0,0.05);">
+                        <a href="#" id="logout-btn" class="logout-link"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                    </div>
+                </div>
+            </div>
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+        
+        <div class="mobile-nav" id="mobile-nav">
+            <a href="courses.html">المكتبة</a>
+            
+            <div id="mobile-guest-links" class="auth-hidden">
+                <a href="login.html">تسجيل الدخول</a>
+                <a href="register.html" class="btn btn-primary" style="border-radius: 12px;">ابدأ التعلم الآن</a>
+            </div>
+
+            <div id="mobile-user-links" class="auth-hidden" style="display:flex; flex-direction:column; gap:15px; margin-top:15px; border-top:1px solid rgba(0,0,0,0.05); padding-top:15px;">
+                <a href="#" id="mobile-dashboard-link" style="color: var(--primary-color); font-weight: bold;">لوحة التحكم</a>
+                <a href="#" id="mobile-logout-btn" style="color: #e74c3c;">تسجيل الخروج</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="course-title-bar">
+        <div class="container">
+            <nav class="breadcrumbs">
+                <a href="index.html">الرئيسية</a> <span>&gt;</span> <a href="courses.html">المكتبة</a> <span>&gt;</span> <span id="breadcrumb-title">...</span>
+            </nav>
+            <h1 id="course-title">جاري التحميل...</h1>
+            <p class="course-short-description" id="course-subtitle">...</p>
+            <div class="course-meta-info">
+                <span>الدكتور: <a href="#" id="instructor-name">...</a></span>
+            </div>
+        </div>
+    </section>
+
+    <div class="page-content-area">
+        <div class="container">
+            <div class="course-details-main">
+                <div class="learning-box">
+                    <h2>عن هذه المادة</h2>
+                    <p id="course-description" style="line-height: 1.8; color: #333;">...</p>
+                </div>
+                <div class="curriculum-section">
+                    <h2>محتوى المادة</h2>
+                    <div id="curriculum-container"></div>
+                </div>
+                <div class="instructor-bio-section">
+                      <h2>عن الدكتور</h2>
+                      <div class="instructor-bio-box">
+                        <img src="https://via.placeholder.com/150" alt="Instructor" id="instructor-img" style="border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        <div class="instructor-info">
+                            <h3 id="instructor-name-bio">...</h3>
+                            <p id="instructor-bio-text" style="color: #555;">دكتور معتمد في منصة سدرة.</p>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <aside class="purchase-sidebar">
+                <div class="purchase-card">
+                    <div class="video-preview" id="preview-container">
+                        <img src="" alt="Course Thumbnail" id="course-thumbnail">
+                        <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
+                    </div>
+
+                    <div class="price-info ios-hidden">
+                        <span class="current-price" id="course-price">مجاني</span>
+                    </div>
+                    
+                    <button id="enroll-btn" class="btn btn-primary btn-fullwidth" style="margin-top: 20px; margin-bottom: 20px; border-radius: 12px;">جاري التحقق...</button>
+                    
+                    <div class="course-features-list">
+                        <h4 style="color: #333;">هذه المادة تشمل:</h4>
+                        <ul>
+                            <li><i class="fas fa-infinity"></i> وصول مدى الحياة</li>
+                            <li><i class="fas fa-mobile-alt"></i> يمكن عرضها على الموبايل</li>
+                            <li id="cert-feature" style="display:none;"><i class="fas fa-trophy"></i> شهادة إتمام</li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- نافذة طلب الانضمام -->
+    <div class="modal-overlay" id="join-request-modal">
+        <div class="payment-modal">
+            <button class="close-modal-btn" onclick="closeJoinModal()">&times;</button>
+            <div style="font-size: 50px; color: var(--primary-color); margin-bottom: 10px;"><i class="fas fa-paper-plane"></i></div>
+            <h3 style="border-bottom:none; margin-bottom:10px; color: #333;">طلب انضمام للمادة</h3>
+            <p style="color:#555; font-size:15px; line-height:1.6; margin-bottom:25px;">سيتم إرسال طلب للإدارة لمنحك صلاحية الوصول إلى هذه المادة. هل تود المتابعة؟</p>
+            
+            <form id="join-request-form">
+                <button type="submit" id="confirm-join-btn" class="btn btn-primary btn-fullwidth" style="border-radius:12px; margin:0; width: 100%;">تأكيد وإرسال الطلب</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item active">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="login.html" class="nav-item" id="bottom-nav-auth-link">
+            <i class="fas fa-user-circle"></i>
+            <span id="bottom-nav-auth-text">حسابي</span>
+        </a>
+    </nav>
+    
+    <script src="script.js"></script>
+    <div id="notification-container" style="position:fixed; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10002; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      // التعديل الأول: استيراد تهيئة الـ Auth وإجبارها على التخزين المحلي
+      import { initializeAuth, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      
+      // التعديل الثاني: استخدام التخزين المحلي بدلاً من IndexedDB
+      const auth = initializeAuth(app, {
+          persistence: browserLocalPersistence
+      });
+      
+      // ================================================================
+      // طبقة REST بديلة عن Firestore SDK مع دعم المصادقة (Auth Token)
+      // ================================================================
+      const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+      function toFirestoreValue(v) {
+          if (v === null || v === undefined) return { nullValue: null };
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+          if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+          if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+          return { stringValue: String(v) };
+      }
+      function jsToFirestoreFields(obj) {
+          const fields = {};
+          for (const key in obj) fields[key] = toFirestoreValue(obj[key]);
+          return fields;
+      }
+      function randomFirestoreId() {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+          let id = '';
+          for (let i = 0; i < 20; i++) id += chars.charAt(Math.floor(Math.random() * chars.length));
+          return id;
+      }
+
+      async function getRestHeaders() {
+          const headers = { 'Content-Type': 'application/json' };
+          if (auth.currentUser) {
+              try {
+                  const token = await auth.currentUser.getIdToken();
+                  if (token) {
+                      headers['Authorization'] = `Bearer ${token}`;
+                  }
+              } catch (e) {
+                  console.error("Error getting auth token:", e);
+              }
+          }
+          return headers;
+      }
+
+      async function restGetDoc(path) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('REST-HTTP-' + res.status + ': ' + (await res.text()).slice(0, 300));
+          const docJson = await res.json();
+          return firestoreFieldsToJs(docJson.fields || {});
+      }
+      
+      async function restRunQuery(collectionId, filters, opts) {
+          opts = opts || {};
+          const fieldFilters = (filters || []).map(f => {
+              const op = f.op || 'EQUAL';
+              const value = op === 'IN' ? { arrayValue: { values: (f.value || []).map(toFirestoreValue) } } : toFirestoreValue(f.value);
+              return { fieldFilter: { field: { fieldPath: f.field }, op, value } };
+          });
+          let where;
+          if (fieldFilters.length === 1) where = fieldFilters[0];
+          else if (fieldFilters.length > 1) where = { compositeFilter: { op: 'AND', filters: fieldFilters } };
+
+          const structuredQuery = { from: [{ collectionId }] };
+          if (where) structuredQuery.where = where;
+          if (opts.orderByField) structuredQuery.orderBy = [{ field: { fieldPath: opts.orderByField }, direction: opts.orderByDir === 'desc' ? 'DESCENDING' : 'ASCENDING' }];
+          if (opts.limit) structuredQuery.limit = opts.limit;
+
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:runQuery?key=${firebaseConfig.apiKey}`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({ structuredQuery })
+          });
+          if (!res.ok) throw new Error('REST-HTTP-' + res.status + ': ' + (await res.text()).slice(0, 300));
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const parts = row.document.name.split('/');
+              results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+
+      async function restCommit(writes) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:commit?key=${firebaseConfig.apiKey}`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({ writes })
+          });
+          if (!res.ok) throw new Error('REST-HTTP-' + res.status + ': ' + (await res.text()).slice(0, 300));
+          return res.json();
+      }
+
+      async function restAddDoc(collectionId, data, serverTimestampField) {
+          const id = randomFirestoreId();
+          const name = `projects/${firebaseConfig.projectId}/databases/(default)/documents/${collectionId}/${id}`;
+          const dataCopy = { ...data };
+          if (serverTimestampField) delete dataCopy[serverTimestampField];
+          const write = { update: { name, fields: jsToFirestoreFields(dataCopy) } };
+          if (serverTimestampField) write.updateTransforms = [{ fieldPath: serverTimestampField, setToServerValue: 'REQUEST_TIME' }];
+          await restCommit([write]);
+          return id;
+      }
+
+      async function restIncrementField(path, fieldPath, byAmount) {
+          const name = `projects/${firebaseConfig.projectId}/databases/(default)/documents/${path}`;
+          const write = {
+              update: { name, fields: {} },
+              updateMask: { fieldPaths: [] },
+              updateTransforms: [{ fieldPath, increment: { integerValue: String(byAmount) } }]
+          };
+          await restCommit([write]);
+      }
+      // ================================================================
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('id');
+
+      if (!courseId) {
+          window.location.href = 'courses.html';
+      }
+
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const enrollBtn = document.getElementById('enroll-btn');
+      
+      const userActions = document.getElementById('user-actions');
+      const guestActions = document.getElementById('guest-actions');
+      const dashboardLink = document.getElementById('dashboard-link');
+      const headerProfileImg = document.getElementById('header-profile-img');
+      
+      const mobileUserLinks = document.getElementById('mobile-user-links');
+      const mobileGuestLinks = document.getElementById('mobile-guest-links');
+      const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
+
+      const bottomNavAuthLink = document.getElementById('bottom-nav-auth-link');
+      const bottomNavAuthText = document.getElementById('bottom-nav-auth-text');
+
+      const bellBtn = document.getElementById('bell-btn');
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const notifBadge = document.getElementById('notif-badge');
+      const notifList = document.getElementById('notif-list');
+      const dropdownCount = document.getElementById('dropdown-count');
+
+      let currentUser = null;
+      let courseData = null;
+      let isEnrolled = false;
+      let latestNotificationTime = 0;
+
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuBtn) {
+          userMenuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              userDropdown.classList.toggle('active');
+          });
+      }
+      
+      document.addEventListener('click', (e) => {
+          if (userMenuBtn && !userMenuBtn.contains(e.target)) {
+              userDropdown.classList.remove('active');
+          }
+          if (bellBtn && !bellBtn.contains(e.target)) {
+              notifDropdown.classList.remove('active');
+          }
+      });
+
+      // التعديل الثالث: استدعاء بيانات الكورس فوراً خارج دالة تسجيل الدخول
+      loadCourseData(); 
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            if(guestActions) guestActions.classList.add('auth-hidden');
+            if(mobileGuestLinks) mobileGuestLinks.classList.add('auth-hidden');
+            if(userActions) userActions.classList.remove('auth-hidden');
+            if(mobileUserLinks) mobileUserLinks.classList.remove('auth-hidden');
+            
+            let dashUrl = "student-dashboard.html";
+            let photoUrl = user.photoURL;
+
+            try {
+                const data = await restGetDoc(`users/${user.uid}`);
+                if(data) {
+                    if(data.role === 'admin') dashUrl = "admin-dashboard.html";
+                    else if(data.role === 'instructor') dashUrl = "instructor-dashboard.html";
+                    if(data.profileImage) photoUrl = data.profileImage;
+                }
+            } catch(e) {
+                if (window.__showDebugErr) window.__showDebugErr('restGetDoc(users) failed: ' + (e.message || e));
+            }
+            
+            const fullName = user.displayName || "مستخدم";
+            if(headerProfileImg) {
+                headerProfileImg.src = photoUrl || `https://ui-avatars.com/api/?name=${fullName}&background=6D28D9&color=fff`;
+            }
+
+            if(dashboardLink) dashboardLink.href = dashUrl;
+            if(mobileDashboardLink) mobileDashboardLink.href = dashUrl;
+            if(bottomNavAuthLink) bottomNavAuthLink.href = dashUrl;
+            if(bottomNavAuthText) bottomNavAuthText.textContent = "لوحتي";
+
+            loadNotifications(user.uid);
+            await checkEnrollment(user.uid);
+        } else {
+            currentUser = null;
+            if(guestActions) guestActions.classList.remove('auth-hidden');
+            if(mobileGuestLinks) mobileGuestLinks.classList.remove('auth-hidden');
+            if(userActions) userActions.classList.add('auth-hidden');
+            if(mobileUserLinks) mobileUserLinks.classList.add('auth-hidden');
+            
+            if(bottomNavAuthLink) bottomNavAuthLink.href = "login.html";
+            if(bottomNavAuthText) bottomNavAuthText.textContent = "دخول";
+        }
+        
+        // تحديث حالة الزر بعد التأكد من تسجيل الدخول
+        updateEnrollButtonState();
+      });
+
+      async function loadCourseData() {
+          try {
+              courseData = await restGetDoc(`courses/${courseId}`);
+
+              if (courseData) {
+                  renderCourseDetails(courseData);
+                  if (courseData.instructorId) loadInstructorData(courseData.instructorId);
+              } else {
+                  document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:#333;'>المادة غير موجودة.</h1>";
+              }
+          } catch (error) {
+              console.error(error);
+              if (window.__showDebugErr) window.__showDebugErr('loadCourseData failed: ' + (error.message || error));
+          } finally {
+              loadingOverlay.style.display = 'none';
+          }
+      }
+
+      async function loadInstructorData(instructorId) {
+          try {
+              const data = await restGetDoc(`users/${instructorId}`);
+              if (data) {
+                  const img = data.profileImage || "https://via.placeholder.com/150";
+                  document.getElementById('instructor-img').src = img;
+                  document.getElementById('instructor-name').textContent = data.name;
+                  document.getElementById('instructor-name-bio').textContent = data.name;
+                  if(data.bio) document.getElementById('instructor-bio-text').textContent = data.bio;
+              }
+          } catch (e) { console.log(e); }
+      }
+
+      function renderCourseDetails(data) {
+          document.getElementById('course-title').textContent = data.title;
+          document.getElementById('breadcrumb-title').textContent = data.title;
+          document.getElementById('course-subtitle').textContent = data.subtitle;
+          document.getElementById('course-description').textContent = data.welcomeMessage;
+          
+          const thumb = data.thumbnail || 'https://via.placeholder.com/800x450';
+          document.getElementById('course-thumbnail').src = thumb;
+          
+          if(data.hasCertificate) document.getElementById('cert-feature').style.display = 'block';
+
+          const previewContainer = document.getElementById('preview-container');
+          const playOverlay = previewContainer.querySelector('.play-overlay');
+          
+          if (data.sections && data.sections.length > 0 && data.sections[0].lessons && data.sections[0].lessons.length > 0) {
+              const firstLesson = data.sections[0].lessons[0];
+              if (firstLesson.type === 'video' && firstLesson.videoId) {
+                  playOverlay.style.display = 'flex';
+                  previewContainer.addEventListener('click', function playPreview() {
+                      previewContainer.innerHTML = `
+                        <iframe src="https://iframe.mediadelivery.net/embed/549357/${firstLesson.videoId}?autoplay=true" 
+                        loading="lazy" 
+                        style="border:none; width:100%; height:100%; min-height:200px; border-radius: 20px 20px 0 0;" 
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" 
+                        allowfullscreen="true"></iframe>
+                      `;
+                      previewContainer.removeEventListener('click', playPreview);
+                      previewContainer.style.cursor = 'default';
+                  });
+              }
+          }
+          
+          // تأكد من تحديث الزر بعد عرض التفاصيل
+          updateEnrollButtonState();
+          
+          const container = document.getElementById('curriculum-container');
+          container.innerHTML = '';
+          if (data.sections && data.sections.length > 0) {
+             data.sections.forEach((section, index) => {
+                 const sectionHTML = `
+                    <div class="curriculum-module">
+                        <div class="module-header" onclick="window.toggleModule(this)">
+                            <span style="color:#333; font-size:15px;"><strong>قسم ${index + 1}:</strong> ${section.title}</span>
+                            <i class="fas fa-chevron-down" style="color:#666;"></i>
+                        </div>
+                        <div class="module-content">
+                            ${section.lessons.map(l => `
+                                <div class="lesson-item">
+                                    <span class="lesson-type-icon"><i class="fas ${l.type === 'quiz' ? 'fa-clipboard-list' : 'fa-play-circle'}"></i></span>
+                                    <span>${l.title}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                 container.insertAdjacentHTML('beforeend', sectionHTML);
+             });
+          }
+      }
+
+      window.toggleModule = (header) => {
+          const moduleContainer = header.parentElement;
+          moduleContainer.classList.toggle('active');
+      }
+
+      async function checkEnrollment(userId) {
+          try {
+              const active = await restRunQuery('enrollments', [
+                  { field: 'studentId', value: userId },
+                  { field: 'courseId', value: courseId },
+                  { field: 'status', value: 'approved' }
+              ]);
+              if (active.length > 0) {
+                  isEnrolled = true;
+                  enrollBtn.dataset.status = 'approved';
+                  return;
+              }
+
+              const pending = await restRunQuery('enrollments', [
+                  { field: 'studentId', value: userId },
+                  { field: 'courseId', value: courseId },
+                  { field: 'status', value: 'pending' }
+              ]);
+              if (pending.length > 0) {
+                  isEnrolled = true;
+                  enrollBtn.dataset.status = 'pending';
+                  return;
+              }
+          } catch (e) { console.error(e); }
+      }
+
+      function updateEnrollButtonState() {
+          if (!courseData) return;
+          
+          if (currentUser && currentUser.uid === courseData.instructorId) {
+              enrollBtn.textContent = "أنت الدكتور (معاينة المادة)";
+              enrollBtn.onclick = () => window.location.href = `lesson-player.html?courseId=${courseId}`;
+              return;
+          }
+
+          if (isEnrolled) {
+              if (enrollBtn.dataset.status === 'pending') {
+                  enrollBtn.textContent = "الطلب قيد المراجعة";
+                  enrollBtn.disabled = true;
+                  enrollBtn.style.backgroundColor = "rgba(245, 158, 11, 0.2)";
+                  enrollBtn.style.color = "#d97706";
+                  enrollBtn.style.borderColor = "transparent";
+              } else {
+                  enrollBtn.textContent = "متابعة المشاهدة";
+                  enrollBtn.style.backgroundColor = "var(--primary-color)";
+                  enrollBtn.style.borderColor = "var(--primary-color)";
+                  enrollBtn.style.color = "#fff";
+                  enrollBtn.onclick = () => window.location.href = `lesson-player.html?courseId=${courseId}`;
+              }
+              return;
+          }
+
+          if (courseData.price > 0) {
+              enrollBtn.textContent = "طلب انضمام للمادة";
+              enrollBtn.disabled = false;
+              enrollBtn.style.background = "var(--primary-color)";
+              enrollBtn.style.color = "#fff";
+              enrollBtn.onclick = handleEnrollClick;
+          } else {
+              enrollBtn.textContent = "تسجيل مجاني";
+              enrollBtn.disabled = false;
+              enrollBtn.onclick = handleEnrollClick;
+          }
+      }
+
+      function handleEnrollClick() {
+          if (!currentUser) {
+              window.location.href = `login.html`; 
+              return;
+          }
+
+          if (courseData.price === 0) {
+              enrollFreeCourse();
+          } else {
+              document.getElementById('join-request-modal').classList.add('active');
+          }
+      }
+
+      window.closeJoinModal = () => document.getElementById('join-request-modal').classList.remove('active');
+
+      const joinForm = document.getElementById('join-request-form');
+      joinForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById('confirm-join-btn');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+          btn.disabled = true;
+
+          try {
+              await restAddDoc('enrollments', {
+                  studentId: currentUser.uid,
+                  studentName: currentUser.displayName,
+                  studentEmail: currentUser.email,
+                  courseId: courseId,
+                  courseTitle: courseData.title,
+                  instructorId: courseData.instructorId,
+                  price: courseData.price, 
+                  status: 'pending',
+                  requestType: 'join_request', 
+                  createdAt: null,
+                  progress: 0,
+                  completedLessons: []
+              }, 'createdAt');
+
+              closeJoinModal();
+              showNotification("تم إرسال طلب الانضمام للإدارة بنجاح!", "success");
+              
+              enrollBtn.textContent = "الطلب قيد المراجعة";
+              enrollBtn.disabled = true;
+              enrollBtn.style.backgroundColor = "rgba(245, 158, 11, 0.2)";
+              enrollBtn.style.color = "#d97706";
+              enrollBtn.style.borderColor = "transparent";
+              enrollBtn.dataset.status = 'pending';
+              isEnrolled = true;
+
+          } catch (error) {
+              console.error(error);
+              showNotification("حدث خطأ أثناء الإرسال", "error");
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+          }
+      });
+
+      async function enrollFreeCourse() {
+          enrollBtn.textContent = "جاري التسجيل...";
+          enrollBtn.disabled = true;
+          try {
+              await restAddDoc('enrollments', {
+                  studentId: currentUser.uid,
+                  studentName: currentUser.displayName,
+                  studentEmail: currentUser.email,
+                  courseId: courseId,
+                  courseTitle: courseData.title,
+                  instructorId: courseData.instructorId,
+                  price: 0,
+                  status: 'approved',
+                  createdAt: null,
+                  progress: 0,
+                  completedLessons: []
+              }, 'createdAt');
+              
+              await restIncrementField(`courses/${courseId}`, 'studentsCount', 1);
+              
+              showNotification("تم تفعيل المادة بنجاح!", "success");
+              setTimeout(() => window.location.href = `lesson-player.html?courseId=${courseId}`, 1500);
+          } catch (err) {
+              console.error(err);
+              showNotification("حدث خطأ", "error");
+              enrollBtn.disabled = false;
+              enrollBtn.textContent = "تسجيل مجاني";
+          }
+      }
+
+      function loadNotifications(uid) {
+          async function renderNotifications() {
+              try {
+                  const notifications = await restRunQuery('system_notifications',
+                      [{ field: 'target', op: 'IN', value: ['all', 'student'] }],
+                      { orderByField: 'createdAt', orderByDir: 'desc', limit: 20 }
+                  );
+
+                  notifList.innerHTML = '';
+                  let unreadCount = 0;
+                  const lastSeenTime = localStorage.getItem(`last_notif_time_${uid}`) || 0;
+
+                  if (notifications.length === 0) {
+                      notifBadge.style.display = 'none';
+                      notifList.innerHTML = '<p style="text-align:center; padding:20px; color:#999; font-size:12px;">لا توجد إشعارات</p>';
+                      return;
+                  }
+
+                  if (notifications[0].createdAt) latestNotificationTime = notifications[0].createdAt.seconds;
+
+                  notifications.forEach(n => {
+                      const date = n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'الآن';
+                      const notifTime = n.createdAt ? n.createdAt.seconds : 0;
+                      
+                      if (notifTime > lastSeenTime) unreadCount++;
+
+                      let iconClass = 'fa-info'; let colorClass = 'type-info';
+                      if(n.type === 'success') { iconClass = 'fa-check'; colorClass = 'type-success'; }
+                      if(n.type === 'warning') { iconClass = 'fa-exclamation'; colorClass = 'type-warning'; }
+                      if(n.type === 'alert') { iconClass = 'fa-bell'; colorClass = 'type-alert'; }
+
+                      const isUnreadClass = (notifTime > lastSeenTime) ? 'unread' : '';
+
+                      const html = `
+                        <div class="notif-item ${isUnreadClass}">
+                            <div class="notif-icon-box ${colorClass}"><i class="fas ${iconClass}"></i></div>
+                            <div class="notif-content">
+                                <h5>${n.title}</h5>
+                                <p>${n.message}</p>
+                                <span class="notif-time">${date}</span>
+                            </div>
+                        </div>`;
+                      notifList.innerHTML += html;
+                  });
+
+                  if (unreadCount > 0) {
+                      notifBadge.style.display = 'flex';
+                      notifBadge.textContent = unreadCount > 9 ? '+9' : unreadCount;
+                      dropdownCount.textContent = unreadCount + ' جديد';
+                  } else {
+                      notifBadge.style.display = 'none';
+                      dropdownCount.textContent = 'لا يوجد جديد';
+                  }
+              } catch (e) { console.error(e); }
+          }
+
+          renderNotifications();
+          setInterval(renderNotifications, 20000);
+      }
+
+      bellBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          notifDropdown.classList.toggle('active');
+          if (notifDropdown.classList.contains('active')) {
+              notifBadge.style.display = 'none';
+              if(currentUser && latestNotificationTime > 0) {
+                  localStorage.setItem(`last_notif_time_${currentUser.uid}`, latestNotificationTime);
+                  dropdownCount.textContent = 'لا يوجد جديد';
+                  setTimeout(() => {
+                      document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+                  }, 2000);
+              }
+          }
+      });
+
+      const handleLogout = async (e) => { e.preventDefault(); await signOut(auth); window.location.reload(); };
+      if(document.getElementById('logout-btn')) document.getElementById('logout-btn').addEventListener('click', handleLogout);
+      if(document.getElementById('mobile-logout-btn')) document.getElementById('mobile-logout-btn').addEventListener('click', handleLogout);
+
+      function showNotification(message, type = 'error') {
+          const container = document.getElementById('notification-container') || createContainer();
+          const toast = document.createElement('div');
+          toast.className = `custom-toast ${type}`;
+          toast.style.cssText = `background: white; border-left: 4px solid ${type === 'success' ? '#10b981' : '#e74c3c'}; padding: 15px 20px; margin-top: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 14px; animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;`;
+          const iconColor = type === 'success' ? '#10b981' : '#e74c3c';
+          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="color:${iconColor}; font-size:18px;"></i><span style="color:#333;">${message}</span>`;
+          container.appendChild(toast);
+          setTimeout(() => {
+              toast.style.animation = 'fadeOutUp 0.4s ease forwards';
+              setTimeout(() => toast.remove(), 400);
+          }, 4000);
+      }
+      function createContainer() {
+          const div = document.createElement('div');
+          div.id = 'notification-container';
+          document.body.appendChild(div);
+          return div;
+      }
+    </script>
+    <style>
+        @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+    </style>
+</body>
+</html>

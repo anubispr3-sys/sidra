@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>مشاهدة الدرس - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- تنسيقات روح التطبيق (Native App Feel) --- */
+        body.lesson-player-page { 
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            margin: 0; font-family: 'Tajawal', sans-serif;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+        
+        /* استثناء السماح بالكتابة وتحديد النص داخل حقل التعليقات فقط */
+        textarea, input {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        * { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.2) transparent; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 20px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* --- الهيدر الزجاجي --- */
+        .lesson-header { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
+            height: 65px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 25px; flex-shrink: 0; z-index: 50;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+        .back-link { text-decoration: none; color: #333; font-weight: bold; display: flex; align-items: center; gap: 8px; font-size: 15px; transition: 0.2s;}
+        .back-link:hover { color: var(--primary-color); }
+        .lesson-info-header h3 { margin: 0; font-size: 16px; color: #111; }
+        .lesson-info-header p { margin: 0; font-size: 12px; color: #555; font-weight: 500;}
+        .desktop-nav-btns { display: flex; gap: 10px; }
+        .desktop-nav-btns .btn { border-radius: 12px; font-family: 'Tajawal'; padding: 8px 18px; font-size: 14px;}
+
+        /* --- التصميم العام والتوزيع (Layout) --- */
+        .player-layout { display: flex; flex-grow: 1; overflow: hidden; position: relative; gap: 20px; padding: 20px; }
+        .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; padding-right: 5px;}
+        
+        /* --- القائمة الجانبية الزجاجية (Sidebar) --- */
+        .sidebar { 
+            width: 320px; 
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+            border-radius: 20px; 
+            display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; z-index: 40; -webkit-overflow-scrolling: touch;
+        }
+        .module-item { border-bottom: 1px solid rgba(255,255,255,0.3); }
+        .module-trigger { padding: 15px 20px; background: transparent; cursor: pointer; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; color: #333; transition: 0.2s;}
+        .module-trigger:hover { background: rgba(255,255,255,0.3); }
+        .module-lessons { display: none; background: rgba(0,0,0,0.02); }
+        .module-lessons.open { display: block; }
+        .lesson-row { padding: 12px 20px; display: flex; align-items: center; gap: 10px; font-size: 13px; cursor: pointer; border-left: 4px solid transparent; color: #444; transition: 0.2s;}
+        .lesson-row:active { transform: scale(0.98); }
+        .lesson-row.active { background: rgba(255,255,255,0.6); color: var(--primary-color); border-left-color: var(--primary-color); font-weight: bold; }
+        .lesson-row:hover:not(.active) { background: rgba(255,255,255,0.3); }
+        .lesson-row.completed i { color: #10b981; }
+
+        /* --- حاوية الفيديو --- */
+        .video-wrapper { 
+            width: 100%; aspect-ratio: 16/9; background: #000; 
+            border-radius: 20px; overflow: hidden; margin-bottom: 20px; 
+            flex-shrink: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative !important; 
+        }
+
+        .video-wrapper:fullscreen {
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: #000; border-radius: 0;
+        }
+        .video-wrapper:-webkit-full-screen {
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: #000; border-radius: 0;
+        }
+        .video-wrapper.ios-fullscreen {
+            position: fixed !important;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw !important; height: 100vh !important;
+            z-index: 999999 !important;
+            margin: 0 !important; border-radius: 0 !important;
+            display: flex; justify-content: center; align-items: center;
+            background: #000;
+        }
+        .video-wrapper:fullscreen iframe, .video-wrapper:-webkit-full-screen iframe, .video-wrapper.ios-fullscreen iframe { width: 100%; height: 100%; }
+        .video-wrapper iframe { width: 100%; height: 100%; border: none; }
+        
+        #watermark-overlay {
+            position: absolute; top: 10px; left: 10px;
+            color: rgba(255, 255, 255, 0.4); font-size: 14px; font-weight: bold;
+            z-index: 2147483647; pointer-events: none; user-select: none;
+            transition: all 4s ease-in-out; text-shadow: 1px 1px 2px #000;
+            font-family: sans-serif; white-space: nowrap;
+        }
+
+        #custom-fs-btn {
+            position: absolute; bottom: 65px; right: 15px; z-index: 2000;
+            background: rgba(0, 0, 0, 0.6); color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px; padding: 8px 15px;
+            cursor: pointer; font-size: 13px; transition: 0.3s;
+            display: flex; align-items: center; gap: 6px;
+            font-family: 'Tajawal', sans-serif; opacity: 0;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .video-wrapper:hover #custom-fs-btn { opacity: 1; }
+        #custom-fs-btn:hover { background: var(--primary-color); border-color: var(--primary-color); }
+
+        /* --- التابات الزجاجية --- */
+        .lesson-tabs { 
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+            border-radius: 20px; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .tab-header { display: flex; border-bottom: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.3); }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: transparent; cursor: pointer; font-family: 'Tajawal'; font-weight: bold; color: #555; border-bottom: 3px solid transparent; transition: 0.2s;}
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); background: rgba(255,255,255,0.5); }
+        .tab-btn:active { transform: scale(0.95); }
+        .tab-body { padding: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        
+        .attachment-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.6); margin-bottom: 10px; transition: 0.2s;
+        }
+        .attachment-item:hover { background: rgba(255,255,255,0.8); }
+        .attachment-info { display: flex; align-items: center; gap: 10px; font-weight: bold; color: #333; }
+        .attachment-icon { color: #ef4444; font-size: 20px; }
+        .view-file-btn {
+            background: var(--primary-color); color: white; border: none;
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 12px;
+            font-family: 'Tajawal'; display: flex; align-items: center; gap: 5px; font-weight: bold;
+        }
+        .view-file-btn:active { transform: scale(0.95); }
+
+        .pdf-modal {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: hidden;
+            background-color: rgba(0,0,0,0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            align-items: center; justify-content: center;
+        }
+        .pdf-modal-content {
+            background: #fff; width: 90%; height: 90%; border-radius: 20px;
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+        }
+        .pdf-header {
+            padding: 15px 20px; background: rgba(17, 24, 39, 0.9); color: #fff;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: bold;
+        }
+        .pdf-frame { width: 100%; flex-grow: 1; border: none; background: #eee; }
+
+        #comments-container { margin-bottom: 15px; }
+        .comment-box { 
+            background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.8); 
+            border-radius: 16px; padding: 15px; display: flex; gap: 12px; margin-bottom: 15px; transition: 0.2s; position: relative; 
+        }
+        .comment-box.answered { border-right: 4px solid #10b981; background: rgba(252, 253, 253, 0.7); }
+        .comment-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid white;}
+        .comment-content { flex-grow: 1; }
+        .comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .user-name { font-weight: bold; font-size: 14px; color: #333; }
+        .comment-date { font-size: 11px; color: #777; }
+        .status-badge { font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: bold; margin-right: 5px; }
+        .status-badge.answered { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .role-badge { font-size: 10px; background: #e0e7ff; color: var(--primary-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px; font-weight: bold;}
+        .comment-text { font-size: 14px; line-height: 1.6; color: #444; margin-bottom: 10px; }
+        
+        .instructor-reply-box { 
+            background-color: rgba(240, 249, 255, 0.7); border: 1px solid rgba(186, 230, 253, 0.8); 
+            border-radius: 12px; padding: 12px; margin-top: 10px; position: relative; 
+        }
+        .instructor-reply-box::before { content: ''; position: absolute; top: -6px; right: 20px; width: 10px; height: 10px; background: rgba(240, 249, 255, 0.7); border-left: 1px solid rgba(186, 230, 253, 0.8); border-top: 1px solid rgba(186, 230, 253, 0.8); transform: rotate(45deg); }
+        .instructor-reply-header { font-size: 12px; font-weight: bold; color: #0369a1; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .instructor-reply-text { font-size: 13px; color: #334155; line-height: 1.6; white-space: pre-wrap; }
+        
+        .mobile-footer { display: none; }
+
+        /* --- تعديلات الموبايل الاحترافية --- */
+        @media (max-width: 992px) {
+            body.lesson-player-page { 
+                height: auto; overflow: visible; display: block; 
+                padding-bottom: calc(75px + env(safe-area-inset-bottom)); 
+            }
+            .lesson-header { padding: 0 15px; }
+            .lesson-info-header, .desktop-nav-btns { display: none; }
+            
+            .player-layout { display: block; overflow: visible; height: auto; padding: 0; gap: 0;}
+            .main-content { padding: 15px; height: auto; overflow: visible; }
+            
+            .video-wrapper { border-radius: 16px; margin-bottom: 20px; width: 100%; }
+            
+            #custom-fs-btn { opacity: 0.85; bottom: 50px; padding: 6px 12px; }
+
+            .sidebar { 
+                position: fixed; top: 0; right: -100%; width: 85%; height: 100%; 
+                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10000; 
+                border-radius: 0; background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+                box-shadow: -10px 0 30px rgba(0,0,0,0.1) !important;
+            }
+            .sidebar.active { right: 0; }
+            
+            .mobile-footer { 
+                display: flex; position: fixed; bottom: 0; left: 0; width: 100%; 
+                background: rgba(255, 255, 255, 0.8) !important;
+                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(255,255,255,0.4); z-index: 999; 
+                justify-content: space-around; align-items: center; 
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+                height: calc(65px + env(safe-area-inset-bottom));
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            .mob-btn { background: none; border: none; font-family: 'Tajawal'; color: #555; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 0; font-weight: bold;}
+            .mob-btn i { font-size: 20px; color: var(--primary-color); }
+            .mob-btn.disabled { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+        }
+        @keyframes fadeIn { from{opacity:0; transform: translateY(5px);} to{opacity:1; transform: translateY(0);} }
+
+        /* ============================================================
+           [DEBUG] صندوق تشخيص مشكلة الفيديو 
+           ============================================================ */
+        #debug-diagnostic-box {
+            background: #111827;
+            color: #e5e7eb;
+            border: 2px solid #f59e0b;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.9;
+            direction: ltr;
+            text-align: left;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        #debug-diagnostic-box .debug-title {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+            text-align: right;
+            font-weight: 800;
+            color: #f59e0b;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed rgba(245, 158, 11, 0.4);
+        }
+        #debug-diagnostic-box .debug-row {
+            display: block;
+            margin-bottom: 6px;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+        #debug-diagnostic-box .debug-label {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="lesson-player-page">
+
+    <div id="loading-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; transition: 0.5s;">
+        <i class="fas fa-spinner fa-spin fa-3x" style="color:#6D28D9"></i>
+        <p style="margin-top:15px; font-weight:bold; color: #333;">جاري تجهيز الدرس...</p>
+    </div>
+
+    <div id="pdf-viewer-modal" class="pdf-modal">
+        <div class="pdf-modal-content">
+            <div class="pdf-header">
+                <span id="pdf-modal-title">عرض الملف</span>
+                <button onclick="closePdfModal()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            <iframe id="pdf-frame" class="pdf-frame" src=""></iframe>
+        </div>
+    </div>
+
+    <header class="lesson-header">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <a href="#" id="back-link" class="back-link"><i class="fas fa-arrow-right"></i> خروج للمادة</a>
+            <div class="lesson-info-header">
+                <h3 id="header-lesson-title">...</h3>
+                <p id="header-course-title">... </p>
+            </div>
+        </div>
+        <div class="desktop-nav-btns">
+            <button id="btn-prev-desk" class="btn btn-secondary btn-sm">السابق</button>
+            <button id="btn-next-desk" class="btn btn-primary btn-sm">التالي</button>
+        </div>
+    </header>
+
+    <div class="player-layout">
+        
+        <main class="main-content hide-scroll">
+            <div id="player-container"></div>
+
+            <!-- [DEBUG] صندوق تشخيص مؤقت -->
+            <div id="debug-diagnostic-box" style="display:none;">
+                <div class="debug-title">🔧 صندوق تشخيص مشكلة الفيديو</div>
+                <span class="debug-row"><span class="debug-label">Origin (Bunny.net Allowed Domains):</span> <span id="debug-origin">-</span></span>
+                <span class="debug-row"><span class="debug-label">Href:</span> <span id="debug-href">-</span></span>
+                <span class="debug-row"><span class="debug-label">UserAgent:</span> <span id="debug-ua">-</span></span>
+                <span class="debug-row"><span class="debug-label">Video URL:</span> <span id="debug-video-url">-</span></span>
+                <span class="debug-row"><span class="debug-label">iframe status:</span> <span id="debug-iframe-status">-</span></span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h2 id="content-title" style="margin:0; font-size:20px; color: #222; font-weight: 800;">...</h2>
+                    <p style="margin:8px 0 0 0; font-size:13px; color:#666; font-weight: 500;">
+                        <i class="fas fa-eye" style="color: var(--primary-color);"></i> مشاهدات الدرس: <span id="view-count-display">0</span>
+                    </p>
+                </div>
+                
+                <button id="mark-complete-btn" class="btn btn-success btn-sm" style="border-radius: 12px; font-family: 'Tajawal'; padding: 10px 20px; font-weight: bold;">
+                    <i class="fas fa-check"></i> اكتمال الدرس
+                </button>
+            </div>
+
+            <div class="lesson-tabs">
+                <div class="tab-header">
+                    <button class="tab-btn active" onclick="switchTab('desc')">عن الدرس</button>
+                    <button class="tab-btn" onclick="switchTab('files')">المرفقات</button>
+                    <button class="tab-btn" onclick="switchTab('discuss')">المناقشات</button>
+                </div>
+                <div class="tab-body">
+                    <div id="tab-desc" class="tab-content active">
+                        <p id="desc-text" style="line-height:1.8; color:#444; font-size: 15px;">...</p>
+                    </div>
+                    
+                    <div id="tab-files" class="tab-content">
+                        <div id="files-list-container"></div>
+                    </div>
+
+                    <div id="tab-discuss" class="tab-content">
+                        <div id="comments-container">
+                            <p style="text-align:center; color:#999;">جاري تحميل المناقشات...</p>
+                        </div>
+                        
+                        <div style="background:rgba(255,255,255,0.5); padding:15px; border-radius:16px; border:1px solid rgba(255,255,255,0.8);">
+                            <textarea id="comment-input" rows="2" class="form-control" placeholder="اكتب سؤالك أو استفسارك هنا..." style="width:100%; margin-bottom:10px; border:1px solid rgba(0,0,0,0.1); border-radius: 12px; padding:12px; box-sizing:border-box; font-family:'Tajawal'; background: rgba(255,255,255,0.8); resize: none;"></textarea>
+                            <button id="send-comment-btn" class="btn btn-primary btn-sm" style="border-radius: 12px; padding: 8px 20px;">إرسال التعليق</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar hide-scroll" id="sidebar">
+            <div style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.4); display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.3);">
+                <strong style="font-size: 16px; color: #222;">محتوى المادة</strong>
+                <button onclick="toggleSidebar()" style="background:none; border:none; font-size:28px; cursor:pointer; display:none; color: #555;" class="mobile-close">&times;</button>
+            </div>
+            
+            <div style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.4);">
+                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; font-weight: bold; color: #444;">
+                    <span>نسبة الإنجاز</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div style="height:8px; background:rgba(0,0,0,0.05); border-radius:4px; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                    <div id="progress-fill" style="width:0%; height:100%; background: linear-gradient(90deg, #34d399, #10b981); transition:0.4s ease-out;"></div>
+                </div>
+            </div>
+
+            <div id="curriculum-list"></div>
+        </aside>
+
+    </div>
+
+    <div class="mobile-footer">
+        <button class="mob-btn" id="btn-prev-mob"><i class="fas fa-chevron-right"></i> السابق</button>
+        <button class="mob-btn" onclick="toggleSidebar()"><i class="fas fa-list-ul"></i> المحتوى</button>
+        <button class="mob-btn" id="btn-next-mob"><i class="fas fa-chevron-left"></i> التالي</button>
+    </div>
+
+    <script src="script.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+            authDomain: "sidra-855f2.firebaseapp.com",
+            projectId: "sidra-855f2",
+            storageBucket: "sidra-855f2.firebasestorage.app",
+            messagingSenderId: "724377690776",
+            appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+            measurementId: "G-WD5BZ4S0S4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // [DEBUG] غيّرها لـ false عشان تقفل صندوق التشخيص
+        const DEBUG_MODE = true;
+
+        // ================================================================
+        // طبقة REST بديلة عن Firestore SDK مع دعم الـ Auth Token
+        // ================================================================
+        const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+        function firestoreValueToJs(value) {
+            if (!value) return null;
+            if ('stringValue' in value) return value.stringValue;
+            if ('integerValue' in value) return parseInt(value.integerValue, 10);
+            if ('doubleValue' in value) return value.doubleValue;
+            if ('booleanValue' in value) return value.booleanValue;
+            if ('nullValue' in value) return null;
+            if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+            if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+            if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+            return null;
+        }
+
+        function firestoreFieldsToJs(fields) {
+            const out = {};
+            for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+            return out;
+        }
+
+        function toFirestoreValue(v) {
+            if (v === null || v === undefined) return { nullValue: null };
+            if (typeof v === 'boolean') return { booleanValue: v };
+            if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+            if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+            if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+            return { stringValue: String(v) };
+        }
+
+        function jsToFirestoreFields(obj) {
+            const fields = {};
+            for (const key in obj) fields[key] = toFirestoreValue(obj[key]);
+            return fields;
+        }
+
+        function randomFirestoreId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let id = '';
+            for (let i = 0; i < 20; i++) id += chars.charAt(Math.floor(Math.random() * chars.length));
+            return id;
+        }
+
+        async function getRestHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (auth.currentUser) {
+                try {
+                    const token = await auth.currentUser.getIdToken();
+                    if (token) {
+                        headers['Authorization'] = `Bearer ${token}`;
+                    }
+                } catch (e) { console.error("Error getting auth token:", e); }
+            }
+            return headers;
+        }
+
+        async function restGetDoc(path) {
+            const headers = await getRestHeaders();
+            const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error('REST Error');
+            const docJson = await res.json();
+            return firestoreFieldsToJs(docJson.fields || {});
+        }
+
+        async function restRunQuery(collectionId, filters, opts = {}) {
+            const fieldFilters = (filters || []).map(f => ({
+                fieldFilter: { field: { fieldPath: f.field }, op: f.op || 'EQUAL', value: toFirestoreValue(f.value) }
+            }));
+            let where = fieldFilters.length === 1 ? fieldFilters[0] : (fieldFilters.length > 1 ? { compositeFilter: { op: 'AND', filters: fieldFilters } } : undefined);
+
+            const structuredQuery = { from: [{ collectionId }] };
+            if (where) structuredQuery.where = where;
+            if (opts.orderByField) structuredQuery.orderBy = [{ field: { fieldPath: opts.orderByField }, direction: opts.orderByDir === 'desc' ? 'DESCENDING' : 'ASCENDING' }];
+
+            const headers = await getRestHeaders();
+            const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:runQuery?key=${firebaseConfig.apiKey}`, {
+                method: 'POST', headers: headers, body: JSON.stringify({ structuredQuery })
+            });
+            if (!res.ok) throw new Error('REST Query Error');
+            const rows = await res.json();
+            const results = [];
+            for (const row of rows) {
+                if (!row.document) continue;
+                const parts = row.document.name.split('/');
+                results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+            }
+            return results;
+        }
+
+        async function restCommit(writes) {
+            const headers = await getRestHeaders();
+            const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:commit?key=${firebaseConfig.apiKey}`, {
+                method: 'POST', headers: headers, body: JSON.stringify({ writes })
+            });
+            if (!res.ok) throw new Error('REST Commit Error');
+            return res.json();
+        }
+
+        async function restAddDoc(collectionId, data, serverTimestampField) {
+            const id = randomFirestoreId();
+            const name = `projects/${firebaseConfig.projectId}/databases/(default)/documents/${collectionId}/${id}`;
+            const dataCopy = { ...data };
+            if (serverTimestampField) delete dataCopy[serverTimestampField];
+            const write = { update: { name, fields: jsToFirestoreFields(dataCopy) } };
+            if (serverTimestampField) write.updateTransforms = [{ fieldPath: serverTimestampField, setToServerValue: 'REQUEST_TIME' }];
+            await restCommit([write]);
+            return id;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('courseId');
+        let currentLessonId = urlParams.get('lessonId'); 
+        
+        let currentUser, courseData, enrollmentData, enrollmentId;
+        let sIdx = 0, lIdx = 0;
+        let watermarkInterval; 
+        let viewsPollingInterval = null; 
+
+        onAuthStateChanged(auth, async (user) => {
+            if(user) {
+                currentUser = user;
+                if(!courseId) return window.location.href = 'student-dashboard.html';
+
+                try {
+                    const userData = await restGetDoc(`users/${user.uid}`);
+                    if (userData && userData.isBanned === true) {
+                        window.location.replace("lesson-restricted.html");
+                        return; 
+                    }
+                } catch(e) { console.error("Error checking ban status:", e); }
+
+                await loadData(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        async function loadData(uid) {
+            try {
+                courseData = await restGetDoc(`courses/${courseId}`);
+                if(!courseData) throw new Error("Course not found");
+
+                const enrollments = await restRunQuery("enrollments", [
+                    { field: "studentId", value: uid },
+                    { field: "courseId", value: courseId }
+                ]);
+                
+                let isAuthorized = false;
+
+                if (enrollments.length > 0) {
+                    for (let data of enrollments) {
+                        let status = data.status || 'approved'; 
+                        if (status === 'approved') {
+                            enrollmentData = data;
+                            enrollmentId = data.id;
+                            isAuthorized = true;
+                            break; 
+                        } else if (status === 'pending') {
+                            alert("عذراً، طلب انضمامك لهذه المادة لا يزال قيد المراجعة. يرجى الانتظار حتى يتم تفعيله.");
+                            window.location.replace(`course-details.html?id=${courseId}`);
+                            return;
+                        }
+                    }
+                }
+
+                if (courseData.instructorId === uid) isAuthorized = true;
+
+                if (!isAuthorized) {
+                    alert("غير مصرح لك بالدخول، يرجى الانضمام للمادة أولاً.");
+                    window.location.replace(`course-details.html?id=${courseId}`);
+                    return;
+                }
+
+                if(currentLessonId) {
+                    const p = currentLessonId.split('-');
+                    sIdx = parseInt(p[0]); lIdx = parseInt(p[1]);
+                }
+
+                renderSidebar();
+                loadLesson(sIdx, lIdx);
+                
+                document.getElementById('back-link').href = `course-details.html?id=${courseId}`;
+                
+                const overlay = document.getElementById('loading-overlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 500);
+
+            } catch(e) { console.error(e); }
+        }
+
+        async function handleViewCount(courseId, sectionIdx, lessonIdx) {
+            const statsDocId = `stats_${courseId}_s${sectionIdx}_l${lessonIdx}`;
+            const name = `projects/${firebaseConfig.projectId}/databases/(default)/documents/lesson_stats/${statsDocId}`;
+            
+            if (viewsPollingInterval) clearInterval(viewsPollingInterval);
+
+            try {
+                const write = {
+                    update: { name, fields: { courseId: { stringValue: courseId } } },
+                    updateMask: { fieldPaths: ["courseId"] }, 
+                    updateTransforms: [
+                        { fieldPath: "views", increment: { integerValue: "1" } },
+                        { fieldPath: "lastViewed", setToServerValue: "REQUEST_TIME" }
+                    ]
+                };
+                await restCommit([write]);
+            } catch (e) { console.error("Error updating views:", e); }
+
+            const fetchViews = async () => {
+                try {
+                    const statData = await restGetDoc(`lesson_stats/${statsDocId}`);
+                    if (statData) {
+                        const views = statData.views || 0;
+                        const el = document.getElementById('view-count-display');
+                        if(el) el.textContent = views;
+                    }
+                } catch(e) {}
+            };
+
+            fetchViews();
+            viewsPollingInterval = setInterval(fetchViews, 20000);
+        }
+
+        function loadLesson(si, li) {
+            sIdx = si; lIdx = li;
+            const lesson = courseData.sections[si].lessons[li];
+            
+            document.getElementById('header-lesson-title').textContent = lesson.title;
+            document.getElementById('header-course-title').textContent = courseData.title;
+            document.getElementById('content-title').textContent = lesson.title;
+            document.getElementById('desc-text').textContent = lesson.description || "لا يوجد وصف لهذا الدرس.";
+
+            const player = document.getElementById('player-container');
+            const markBtn = document.getElementById('mark-complete-btn');
+
+            if(watermarkInterval) clearInterval(watermarkInterval);
+
+            if(lesson.type === 'quiz') {
+                player.innerHTML = `
+                    <div style="padding:40px 20px; text-align:center; background:rgba(255,255,255,0.6); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.8); border-radius:20px; margin-bottom:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <i class="fas fa-clipboard-list" style="font-size:50px; color:var(--primary-color); margin-bottom:20px;"></i>
+                        <h3 style="color:#222; font-size:22px; margin-bottom:15px;">اختبار: ${lesson.title}</h3>
+                        <a href="quiz.html?courseId=${courseId}&lessonId=${si}-${li}" class="btn btn-primary" style="margin-top:10px; display:inline-block; border-radius:12px; padding:12px 30px; font-size:16px;">ابدأ الاختبار</a>
+                    </div>
+                `;
+                markBtn.style.display = 'none';
+
+                if (DEBUG_MODE) {
+                    const debugBox = document.getElementById('debug-diagnostic-box');
+                    if (debugBox) debugBox.style.display = 'none';
+                }
+            } else {
+                markBtn.style.display = 'block';
+                const vid = lesson.videoId;
+                const embed = `https://iframe.mediadelivery.net/embed/549357/${vid}?autoplay=false`;
+                
+                player.innerHTML = `
+                    <div class="video-wrapper" id="video-container-box">
+                        <iframe id="bunny-player-iframe" src="${embed}" style="width:100%; height:100%; border:none;" allow="autoplay; encrypted-media"></iframe>
+                        <div id="watermark-overlay"></div>
+                        <button id="custom-fs-btn" onclick="window.toggleContainerFullscreen()">
+                            <i class="fas fa-expand"></i> تكبير الشاشة
+                        </button>
+                    </div>
+                `;
+
+                const watermarkText = currentUser.email || currentUser.displayName || "طالب أكاديمية سدرة";
+                startWatermarkAnimation(watermarkText);
+
+                // [DEBUG] تشخيص مشكلة الفيديو
+                if (DEBUG_MODE) {
+                    const debugBox = document.getElementById('debug-diagnostic-box');
+                    if (debugBox) {
+                        debugBox.style.display = 'block';
+                        document.getElementById('debug-origin').textContent = window.location.origin || '(فارغ / مفيش origin)';
+                        document.getElementById('debug-href').textContent = window.location.href;
+                        document.getElementById('debug-ua').textContent = navigator.userAgent;
+                        document.getElementById('debug-video-url').textContent = embed;
+
+                        const statusEl = document.getElementById('debug-iframe-status');
+                        statusEl.textContent = '⏳ جاري تحميل الفيديو...';
+                        statusEl.style.color = '#fbbf24';
+
+                        const iframeEl = document.getElementById('bunny-player-iframe');
+                        if (iframeEl) {
+                            let debugLoadTimeout = setTimeout(() => {
+                                statusEl.textContent = '❌ الفيديو ما استجابش خلال 8 ثواني (احتمال حجب الدومين من Bunny)';
+                                statusEl.style.color = '#ef4444';
+                            }, 8000);
+
+                            iframeEl.addEventListener('load', () => {
+                                clearTimeout(debugLoadTimeout);
+                                statusEl.textContent = '✅ الـ iframe اتحمّل بنجاح (لو الشاشة لسه سودا، يبقى Bunny رافض تشغيل الفيديو على الـ Origin المكتوب فوق)';
+                                statusEl.style.color = '#10b981';
+                            });
+
+                            iframeEl.addEventListener('error', () => {
+                                clearTimeout(debugLoadTimeout);
+                                statusEl.textContent = '❌ فشل تحميل الـ iframe تماماً';
+                                statusEl.style.color = '#ef4444';
+                            });
+                        }
+                    }
+                }
+            }
+
+            handleViewCount(courseId, si, li);
+            updateMarkButton(lesson.title);
+            
+            const filesList = document.getElementById('files-list-container');
+            filesList.innerHTML = '';
+
+            if(lesson.attachments && lesson.attachments.length > 0) {
+                lesson.attachments.forEach(f => {
+                    const safeUrl = f.url + "#toolbar=0&navpanes=0&scrollbar=0";
+                    filesList.innerHTML += `
+                        <div class="attachment-item">
+                            <div class="attachment-info">
+                                <i class="fas fa-file-pdf attachment-icon"></i>
+                                <span>${f.name}</span>
+                            </div>
+                            <button class="view-file-btn" onclick="openPdfViewer('${f.name}', '${safeUrl}')">
+                                <i class="fas fa-eye"></i> عرض الملف
+                            </button>
+                        </div>
+                    `;
+                });
+            } else {
+                filesList.innerHTML = '<p style="color:#777; text-align:center; padding:30px; font-weight:bold;">لا توجد مرفقات لهذا الدرس.</p>';
+            }
+
+            loadComments(lesson.title);
+            updateNavButtons();
+            renderSidebar(); 
+            
+            if(window.innerWidth < 992) document.getElementById('sidebar').classList.remove('active');
+        }
+
+        window.openPdfViewer = (title, url) => {
+            document.getElementById('pdf-modal-title').textContent = title;
+            document.getElementById('pdf-frame').src = url;
+            document.getElementById('pdf-viewer-modal').style.display = 'flex';
+        }
+
+        window.closePdfModal = () => {
+            document.getElementById('pdf-viewer-modal').style.display = 'none';
+            document.getElementById('pdf-frame').src = ''; 
+        }
+
+        function startWatermarkAnimation(text) {
+            const wm = document.getElementById('watermark-overlay');
+            const container = document.getElementById('video-container-box');
+            if (!wm || !container) return;
+
+            wm.textContent = text;
+            const moveWatermark = () => {
+                const maxX = container.clientWidth - wm.clientWidth - 40;
+                const maxY = container.clientHeight - wm.clientHeight - 40;
+                const safeX = Math.max(0, maxX);
+                const safeY = Math.max(0, maxY);
+                const randomX = Math.floor(Math.random() * safeX);
+                const randomY = Math.floor(Math.random() * safeY);
+
+                wm.style.left = randomX + 'px';
+                wm.style.top = randomY + 'px';
+            };
+
+            moveWatermark();
+            watermarkInterval = setInterval(moveWatermark, 5000);
+        }
+
+        window.toggleContainerFullscreen = () => {
+            const elem = document.getElementById('video-container-box');
+            const btn = document.getElementById('custom-fs-btn');
+            const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || elem.classList.contains('ios-fullscreen');
+            
+            if (!isFullscreen) {
+                if (elem.requestFullscreen) { elem.requestFullscreen().then(() => { if(btn) btn.innerHTML = '<i class="fas fa-compress"></i> تصغير الشاشة'; }); } 
+                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); if(btn) btn.innerHTML = '<i class="fas fa-compress"></i> تصغير الشاشة'; } 
+                else { elem.classList.add('ios-fullscreen'); if(btn) btn.innerHTML = '<i class="fas fa-compress"></i> تصغير الشاشة'; }
+            } else {
+                if (document.exitFullscreen && document.fullscreenElement) { document.exitFullscreen().then(() => { if(btn) btn.innerHTML = '<i class="fas fa-expand"></i> تكبير الشاشة'; }); } 
+                else if (document.webkitExitFullscreen && document.webkitFullscreenElement) { document.webkitExitFullscreen(); if(btn) btn.innerHTML = '<i class="fas fa-expand"></i> تكبير الشاشة'; } 
+                else if(elem.classList.contains('ios-fullscreen')) { elem.classList.remove('ios-fullscreen'); if(btn) btn.innerHTML = '<i class="fas fa-expand"></i> تكبير الشاشة'; }
+            }
+        };
+
+        document.addEventListener('fullscreenchange', handleFSChange);
+        document.addEventListener('webkitfullscreenchange', handleFSChange);
+
+        function handleFSChange() {
+            const btn = document.getElementById('custom-fs-btn');
+            if(btn) {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) { btn.innerHTML = '<i class="fas fa-expand"></i> تكبير الشاشة'; } 
+                else { btn.innerHTML = '<i class="fas fa-compress"></i> تصغير الشاشة'; }
+            }
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('curriculum-list');
+            list.innerHTML = '';
+            let total=0, done=enrollmentData?.completedLessons?.length || 0;
+
+            courseData.sections.forEach((sec, si) => {
+                let html = '';
+                sec.lessons.forEach((les, li) => {
+                    total++;
+                    const active = (si===sIdx && li===lIdx) ? 'active' : '';
+                    const isDone = enrollmentData?.completedLessons?.includes(les.title);
+                    const doneClass = isDone ? 'completed' : '';
+                    const icon = les.type==='quiz' ? 'fa-clipboard-list' : (isDone ? 'fa-check-circle' : 'fa-play-circle');
+                    
+                    html += `
+                        <div class="lesson-row ${active} ${doneClass}" onclick="window.changeLesson(${si}, ${li})">
+                            <i class="fas ${icon}"></i> <span>${les.title}</span>
+                        </div>
+                    `;
+                });
+
+                const isOpen = (si === sIdx) ? 'open' : '';
+                const chev = (si === sIdx) ? 'up' : 'down';
+                
+                list.innerHTML += `
+                    <div class="module-item">
+                        <div class="module-trigger" onclick="this.nextElementSibling.classList.toggle('open'); this.querySelector('i').classList.toggle('fa-chevron-up'); this.querySelector('i').classList.toggle('fa-chevron-down');">
+                            <span>${sec.title}</span> <i class="fas fa-chevron-${chev}"></i>
+                        </div>
+                        <div class="module-lessons ${isOpen}">
+                            ${html}
+                        </div>
+                    </div>
+                `;
+            });
+
+            const p = total ? Math.round((done/total)*100) : 0;
+            document.getElementById('progress-percent').textContent = p+'%';
+            document.getElementById('progress-fill').style.width = p+'%';
+        }
+
+        async function loadComments(lessonTitle) {
+            const cont = document.getElementById('comments-container');
+            cont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px; font-weight:bold;">جاري تحميل المناقشات...</p>';
+            
+            try {
+                const comments = await restRunQuery("comments", [
+                    { field: "courseId", value: courseId },
+                    { field: "lessonTitle", value: lessonTitle }
+                ], { orderByField: "createdAt", orderByDir: "asc" });
+
+                cont.innerHTML = '';
+                if(comments.length === 0) {
+                    cont.innerHTML = '<p style="text-align:center; color:#777; margin-top:20px; font-weight:bold;">كن أول من يسأل أو يشارك برأيه!</p>';
+                    return;
+                }
+
+                comments.forEach(c => {
+                    const badge = c.role === 'instructor' ? '<span class="role-badge">دكتور المادة</span>' : '';
+                    const date = c.createdAt ? new Date(c.createdAt.seconds*1000).toLocaleDateString('ar-EG') : '';
+                    const userImage = c.userImage || 'https://via.placeholder.com/40';
+
+                    let replyHTML = '';
+                    let answeredClass = '';
+                    let answeredBadge = '';
+
+                    if (c.instructorReply) {
+                        replyHTML = `
+                            <div class="instructor-reply-box">
+                                <div class="instructor-reply-header">
+                                    <i class="fas fa-chalkboard-teacher"></i> رد الدكتور:
+                                </div>
+                                <div class="instructor-reply-text">${c.instructorReply}</div>
+                            </div>
+                        `;
+                        answeredClass = 'answered';
+                        answeredBadge = '<span class="status-badge answered"><i class="fas fa-check"></i> تمت الإجابة</span>';
+                    }
+
+                    cont.innerHTML += `
+                        <div class="comment-box ${answeredClass}">
+                            <img src="${userImage}" class="comment-avatar" onerror="this.src='https://via.placeholder.com/40'">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <div style="display:flex; align-items:center;">
+                                        <span class="user-name">${c.userName}</span>
+                                        ${badge}
+                                    </div>
+                                    <div style="display:flex; align-items:center;">
+                                        ${answeredBadge}
+                                        <span class="comment-date">${date}</span>
+                                    </div>
+                                </div>
+                                <div class="comment-text">${c.text}</div>
+                                ${replyHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                console.warn(e);
+                cont.innerHTML = '<p style="color:red; text-align:center; font-weight:bold;">خطأ في تحميل التعليقات</p>';
+            }
+        }
+
+        document.getElementById('send-comment-btn').addEventListener('click', async () => {
+            const txt = document.getElementById('comment-input').value.trim();
+            if(!txt) return;
+            const lesson = courseData.sections[sIdx].lessons[lIdx];
+            const role = (courseData.instructorId === currentUser.uid) ? 'instructor' : 'student';
+            
+            const btn = document.getElementById('send-comment-btn');
+            const originalTxt = btn.innerText;
+            btn.innerText = "جاري الإرسال...";
+            btn.disabled = true;
+
+            try {
+                await restAddDoc('comments', {
+                    text: txt, courseId, lessonTitle: lesson.title, userId: currentUser.uid,
+                    userName: currentUser.displayName, userImage: currentUser.photoURL, role,
+                    createdAt: null 
+                }, 'createdAt');
+                
+                document.getElementById('comment-input').value = '';
+                loadComments(lesson.title);
+            } catch(e) { alert("فشل الإرسال، يرجى المحاولة لاحقاً"); } 
+            finally { btn.innerText = originalTxt; btn.disabled = false; }
+        });
+
+        window.changeLesson = (s, l) => {
+            const u = new URL(window.location);
+            u.searchParams.set('lessonId', `${s}-${l}`);
+            window.history.pushState({}, '', u);
+            loadLesson(s, l);
+        }
+
+        window.switchTab = (id) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            const btns = document.querySelectorAll('.tab-btn');
+            if(id === 'desc') btns[0].classList.add('active');
+            if(id === 'files') btns[1].classList.add('active');
+            if(id === 'discuss') btns[2].classList.add('active');
+            
+            document.getElementById('tab-'+id).classList.add('active');
+        }
+
+        window.toggleSidebar = () => {
+            const sb = document.getElementById('sidebar');
+            sb.classList.toggle('active');
+            const closeBtn = document.querySelector('.mobile-close');
+            if(window.innerWidth < 992) closeBtn.style.display = sb.classList.contains('active') ? 'block' : 'none';
+        }
+
+        function updateMarkButton(title) {
+            const btn = document.getElementById('mark-complete-btn');
+            const isDone = enrollmentData?.completedLessons?.includes(title);
+            
+            if(isDone) {
+                btn.innerHTML = '<i class="fas fa-check-double"></i> مكتمل';
+                btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                btn.style.color = '#10b981';
+                btn.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                btn.disabled = true;
+            } else {
+                btn.innerHTML = '<i class="fas fa-check"></i> اكتمال الدرس';
+                btn.style.background = '#10b981';
+                btn.style.color = '#fff';
+                btn.style.border = 'none';
+                btn.disabled = false;
+                
+                btn.onclick = async () => {
+                    if(!enrollmentId) return; 
+                    const origHtml = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> حفظ...';
+                    btn.disabled = true;
+                    
+                    try {
+                        if(!enrollmentData.completedLessons) enrollmentData.completedLessons = [];
+                        enrollmentData.completedLessons.push(title);
+
+                        let totalLessons = 0;
+                        courseData.sections.forEach(sec => totalLessons += sec.lessons.length);
+                        const currentProgress = Math.round((enrollmentData.completedLessons.length / totalLessons) * 100);
+
+                        const write = {
+                            update: { 
+                                name: `projects/${firebaseConfig.projectId}/databases/(default)/documents/enrollments/${enrollmentId}`, 
+                                fields: { progress: { integerValue: String(currentProgress) } } 
+                            },
+                            updateMask: { fieldPaths: ["progress"] },
+                            updateTransforms: [
+                                { fieldPath: "completedLessons", appendMissingElements: { values: [{ stringValue: title }] } }
+                            ]
+                        };
+                        await restCommit([write]);
+
+                        updateMarkButton(title);
+                        renderSidebar();
+                    } catch(e) { 
+                        console.error(e); 
+                        btn.innerHTML = origHtml;
+                        btn.disabled = false;
+                    }
+                };
+            }
+        }
+
+        function updateNavButtons() {
+            let nextS=sIdx, nextL=lIdx+1;
+            if(nextL >= courseData.sections[sIdx].lessons.length) { nextS++; nextL=0; }
+            const hasNext = nextS < courseData.sections.length;
+
+            let prevS=sIdx, prevL=lIdx-1;
+            if(prevL < 0) { prevS--; if(prevS>=0) prevL = courseData.sections[prevS].lessons.length-1; }
+            const hasPrev = prevS >= 0;
+
+            const updateBtn = (id, enabled, cb) => {
+                const b = document.getElementById(id);
+                if(b) {
+                    b.disabled = !enabled;
+                    b.classList.toggle('disabled', !enabled);
+                    b.onclick = enabled ? cb : null;
+                }
+            };
+
+            const nextFn = () => window.changeLesson(nextS, nextL);
+            const prevFn = () => window.changeLesson(prevS, prevL);
+
+            updateBtn('btn-prev-desk', hasPrev, prevFn);
+            updateBtn('btn-prev-mob', hasPrev, prevFn);
+
+            const deskBtn = document.getElementById('btn-next-desk');
+            const mobBtn = document.getElementById('btn-next-mob');
+
+            if (hasNext) {
+                updateBtn('btn-next-desk', true, nextFn);
+                updateBtn('btn-next-mob', true, nextFn);
+                if(deskBtn) deskBtn.textContent = 'التالي';
+                if(mobBtn) mobBtn.innerHTML = '<i class="fas fa-chevron-left"></i> التالي';
+            } else {
+                const finishFn = () => window.location.href = 'my-certificates.html';
+                updateBtn('btn-next-desk', true, finishFn);
+                updateBtn('btn-next-mob', true, finishFn);
+                if(deskBtn) deskBtn.textContent = 'استلام الشهادة';
+                if(mobBtn) mobBtn.innerHTML = '<i class="fas fa-certificate"></i> الشهادة';
+            }
+        }
+    </script>
+</body>
+</html>

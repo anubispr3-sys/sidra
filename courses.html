@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>كل المواد - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- تحسين الأداء: فتح الاتصال بالنطاقات الخارجية مبكراً (DNS + TLS) قبل الحاجة الفعلية لها،
+         ده بيقلل زمن الانتظار خصوصاً على شبكات الموبايل المصرية اللي زمن الاستجابة فيها أعلى -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- روح التطبيق ومراعاة النوتش --- */
+        body {
+            -webkit-user-select: none; user-select: none; 
+            -webkit-tap-highlight-color: transparent; 
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        
+        input, select {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; }
+        
+        /* --- شاشة التحميل --- */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 10000; display: flex; justify-content: center; align-items: center;
+            flex-direction: column; transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        /* --- تأثير Glassmorphism للواجهة --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* --- تنسيقات قائمة المستخدم الاحترافية --- */
+        .user-header-profile { position: relative; cursor: pointer; display: flex; align-items: center; margin-right: auto; }
+        .user-header-profile img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color); padding: 2px; background-color: white; }
+        .user-dropdown { display: none; position: absolute; top: 55px; left: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 15px 50px rgba(0,0,0,0.15); border-radius: 20px; width: 180px; z-index: 1000; flex-direction: column; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+        .user-dropdown.active { display: flex; animation: fadeIn 0.2s ease; }
+        .user-dropdown a { padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; font-family: 'Tajawal'; font-size: 14px; display: flex; gap: 10px; align-items: center; font-weight: 600;}
+        .user-dropdown a:hover { background-color: rgba(255,255,255,0.6); color: var(--primary-color); }
+        .user-dropdown i { width: 15px; text-align: center; color: var(--text-light); }
+        .user-dropdown a:hover i { color: var(--primary-color); }
+        .user-dropdown .logout-link { color: #e74c3c; }
+        .user-dropdown .logout-link i { color: #e74c3c; }
+        .user-dropdown .logout-link:hover { background-color: #fdf2f2; color: #e74c3c; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Layout */
+        .page-container { padding: 40px 0; background-color: transparent; min-height: 80vh; }
+        .courses-layout { display: flex; gap: 30px; align-items: flex-start; }
+        
+        /* Sidebar Filter */
+        .filters-sidebar { 
+            flex: 0 0 280px; 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(20px); 
+            padding: 25px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.5); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            position: sticky; 
+            top: 20px; 
+        }
+        .filter-group { margin-bottom: 25px; }
+        .filter-group h4 { margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333; }
+        .filter-option { display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-size: 14px; color: #555; font-weight: 500;}
+        .filter-option input { margin-left: 10px; width: 16px; height: 16px; accent-color: var(--primary-color); }
+        
+        /* حقول البحث والترتيب بأسلوب iOS */
+        .search-input-box, #sort-select { 
+            width: 100%; 
+            padding: 12px 15px; 
+            background: rgba(255, 255, 255, 0.5) !important;
+            border: none !important; 
+            border-radius: 12px !important; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+            font-family: 'Tajawal'; 
+            margin-bottom: 20px; 
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        .search-input-box:focus, #sort-select:focus {
+            background: rgba(255, 255, 255, 0.8) !important;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.3) !important;
+        }
+
+        /* Courses Grid */
+        .courses-content { flex: 1; }
+        .courses-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
+        .courses-header h3 { color: #333; font-weight: 800; margin: 0;}
+        .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        
+        /* Card Design */
+        .course-card { 
+            background: rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(20px);
+            border-radius: 20px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255,255,255,0.5); 
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        }
+        .course-card:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .course-card:active { transform: scale(0.98); } 
+        .course-thumb { height: 180px; width: 100%; object-fit: cover; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .course-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; text-align: right; direction: rtl; }
+        .course-cat { font-size: 11px; color: var(--primary-color); background: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 8px; display: inline-block; font-weight: bold; }
+        .course-title { font-size: 16px; font-weight: 800; margin: 0 0 10px; color: #333; line-height: 1.5; }
+        .course-instructor { font-size: 13px; color: #666; margin-bottom: 15px; display: flex; justify-content: flex-start; gap: 8px; align-items: center; }
+        .course-footer { margin-top: auto; display: flex; justify-content: flex-end; align-items: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 15px; }
+        
+        .btn-details-elegant {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 8px 20px; background-color: rgba(255,255,255,0.6);
+            color: var(--primary-color); border: 1px solid rgba(109, 40, 217, 0.2);
+            border-radius: 12px; font-size: 13px; font-family: 'Tajawal', sans-serif;
+            font-weight: 700; text-decoration: none; transition: all 0.3s ease;
+        }
+        .btn-details-elegant:hover {
+            background-color: var(--primary-color); color: white;
+            box-shadow: 0 4px 15px rgba(109, 40, 217, 0.2);
+        }
+
+        /* Pagination - مُحسّن للموبايل */
+        .pagination-controls { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
+        .page-btn { 
+            padding: 8px 16px; 
+            border: 1px solid rgba(255,255,255,0.6); 
+            background: rgba(255,255,255,0.4); 
+            backdrop-filter: blur(10px);
+            cursor: pointer; 
+            border-radius: 10px; 
+            font-family: 'Tajawal'; 
+            transition: 0.2s; 
+            font-weight: bold;
+            color: #555;
+        }
+        .page-btn:active { transform: scale(0.95); }
+        .page-btn.active { background: var(--primary-color); color: white; border: none; box-shadow: 0 4px 10px rgba(109,40,217,0.2);}
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ====== التعديلات الجراحية الخاصة بنسخة الموبايل ====== */
+        @media (max-width: 992px) {
+            /* منع السكرول العرضي في الموبايل بالكامل */
+            body, html { overflow-x: hidden !important; }
+            .page-container { overflow-x: hidden !important; }
+
+            /* تنظيم التخطيط العام للموبايل */
+            .courses-layout { flex-direction: column !important; gap: 15px !important; display: flex !important; box-sizing: border-box !important; width: 100% !important;}
+            
+            /* إجبار الحاوية على الظهور لتوضيح حقل البحث فقط وضبط حدودها */
+            .filters-sidebar { 
+                display: block !important;
+                /* تصفير الـ flex-basis الموروث من نسخة الديسكتوب (flex: 0 0 280px):
+                   في الديسكتوب الرقم ده بيحدد العرض لأن الاتجاه صف (row)، لكن بعد ما
+                   .courses-layout بيتحول لعمود (column) في الموبايل، نفس الرقم بيتفسر
+                   كـ"ارتفاع" إجباري 280px، وده كان السبب الحقيقي للفراغ الكبير بعد شريط البحث */
+                flex: 0 0 auto !important;
+                width: 100% !important; 
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                position: static !important; 
+                margin-bottom: 0 !important; 
+                padding: 0 !important; 
+                background: transparent !important; 
+                border: none !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+            }
+
+            /* تصفير الهامش السفلي لكل مجموعات الفلاتر في الموبايل، لأن حقل البحث هو الوحيد الظاهر فعلياً */
+            .filters-sidebar .filter-group {
+                margin-bottom: 0 !important;
+            }
+
+            /* تنسيق حقل البحث الاحترافي مع منع الخروج عن الشاشة */
+            .search-input-box {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                background: rgba(255, 255, 255, 0.85) !important;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.05) !important;
+                padding: 15px 20px !important;
+                border-radius: 16px !important;
+                font-size: 15px !important;
+                font-weight: 700 !important;
+                margin-bottom: 0 !important; 
+            }
+
+            /* إخفاء قسم التصنيفات بالكامل (العنوان والأزرار) ومنع أي سحب */
+            /* ملاحظة: الإخفاء هنا بالـ #id مباشرة (مش :has()) عشان نضمن شغله على كل نسخ آيفون،
+               حتى القديمة اللي ممكن متدعمش :has() — وده كان سبب ظهور فراغ كبير قبل التصنيفات */
+            #category-filter-group,
+            #dynamic-categories-container,
+            .filter-group h4 { 
+                display: none !important; 
+            }
+
+            /* ضبط المسافات بين عناصر الهيدر للمواد - فراغ أقل وأكثر إحكاماً بعد شريط البحث */
+            .courses-header { margin-top: 12px !important; }
+
+            /* الإعدادات الأساسية الافتراضية لقالبك */
+            .guest-actions, .mobile-menu-toggle { display: none !important; }
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)) !important; }
+            .main-footer { display: none !important; }
+        }
+        /* ==================================================== */
+
+        #mobile-guest-links { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary-color);"></i>
+        <p style="margin-top: 15px; font-weight: bold; color: #333;">جاري تجهيز المكتبة...</p>
+        <p id="debug-status" style="display: none;"></p>
+    </div>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="index.html">الرئيسية</a>
+                <a href="courses.html" class="active">المكتبة</a>
+                <a href="about.html">من نحن</a>
+            </nav>
+            
+            <div class="user-header-profile auth-hidden" id="user-actions">
+                <div id="user-menu-btn">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="User" id="header-profile-img">
+                </div>
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="#" id="dashboard-link"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+                    <a href="profile-settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+                    <hr style="margin: 0; border: 0; border-top: 1px solid rgba(0,0,0,0.05);">
+                    <a href="#" id="logout-btn" class="logout-link"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                </div>
+            </div>
+
+            <div class="guest-actions auth-hidden" id="guest-actions">
+                <a href="login.html" class="btn btn-secondary">دخول</a>
+                <a href="register.html" class="btn btn-primary" style="border-radius: 12px;">حساب جديد</a>
+            </div>
+            
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+        </div>
+        
+        <div class="mobile-nav" id="mobile-nav">
+            <a href="index.html">الرئيسية</a>
+            <a href="courses.html">المكتبة</a>
+            
+            <div class="auth-hidden" id="mobile-user-links">
+                <a href="#" id="mobile-dashboard-link" style="color: var(--primary-color); font-weight: bold;">لوحة التحكم</a>
+                <a href="#" id="mobile-logout-btn" style="color: #e74c3c;">تسجيل خروج</a>
+            </div>
+
+            <div class="auth-hidden" id="mobile-guest-links">
+                <a href="login.html">تسجيل الدخول</a>
+                <a href="register.html" class="btn btn-primary">ابدأ التعلم الآن</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <div class="container">
+            <div class="courses-layout">
+                
+                <aside class="filters-sidebar">
+                    <div class="filter-group">
+                        <input type="text" id="search-input" class="search-input-box" placeholder="ابحث عن مادة...">
+                    </div>
+
+                    <div class="filter-group" id="category-filter-group">
+                        <h4>التصنيف</h4>
+                        <div id="dynamic-categories-container">
+                            <label class="filter-option"><input type="radio" name="category" value="all" checked> الكل</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-group ios-hidden">
+                        <h4>السعر</h4>
+                        <label class="filter-option"><input type="radio" name="price" value="all" checked> الكل</label>
+                        <label class="filter-option"><input type="radio" name="price" value="free"> مجاني</label>
+                        <label class="filter-option"><input type="radio" name="price" value="paid"> مدفوع</label>
+                    </div>
+                </aside>
+
+                <main class="courses-content">
+                    <div class="courses-header">
+                        <h3>جميع المواد (<span id="courses-count">0</span>)</h3>
+                        <div style="width: 150px;">
+                            <select id="sort-select">
+                                <option value="newest">الأحدث</option>
+                                <option value="oldest">الأقدم</option>
+                                <option value="price-low" class="ios-hidden">الأقل سعراً</option>
+                                <option value="price-high" class="ios-hidden">الأعلى سعراً</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="courses-grid" id="courses-grid">
+                        </div>
+
+                    <div class="pagination-controls" id="pagination-controls" style="display: none;">
+                        <button class="page-btn" id="prev-page">السابق</button>
+                        <div id="page-numbers" style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;"></div>
+                        <button class="page-btn" id="next-page">التالي</button>
+                    </div>
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom"><p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p></div>
+        </div>
+    </footer>
+
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item active">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="login.html" class="nav-item" id="bottom-nav-auth-link">
+            <i class="fas fa-user-circle"></i>
+            <span id="bottom-nav-auth-text">حسابي</span>
+        </a>
+    </nav>
+
+    <script>
+      // --- لوج فوري خارج أي module/import: لو ده مبيوصلش أصلاً، يبقى فيه
+      //     مشكلة في تحميل السكريبت نفسه جوه الـ WebView (CSP أو حجب تحميل) ---
+      (function() {
+          const WEBHOOK_URL = 'https://webhook.site/4f8046b1-3600-4c78-97d4-a53d07eb7cdc';
+          window.__remoteLog = function(step, extra) {
+              try {
+                  const url = WEBHOOK_URL + '?step=' + encodeURIComponent(step) +
+                      '&extra=' + encodeURIComponent(String(extra || '').slice(0, 500)) +
+                      '&t=' + Date.now();
+                  fetch(url, { method: 'GET', mode: 'no-cors' }).catch(() => {});
+                  const img = new Image();
+                  img.src = url + '&via=img';
+              } catch (e) {}
+          };
+          window.__remoteLog('0) inline-script-started', 'ua=' + navigator.userAgent + ' online=' + navigator.onLine);
+
+          window.addEventListener('error', function(e) {
+              window.__remoteLog('GLOBAL-ERROR', (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || ''));
+          });
+          window.addEventListener('unhandledrejection', function(e) {
+              const r = e.reason;
+              window.__remoteLog('UNHANDLED-REJECTION', (r && (r.message || r.code)) ? (r.code || '') + ' ' + (r.message || '') : String(r));
+          });
+      })();
+    </script>
+
+    <script type="module">
+      window.__remoteLog('0.5) module-script-started');
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      window.__remoteLog('0.6) firebase-imports-loaded');
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      function setDebugStatus(msg) {
+          const el = document.getElementById('debug-status');
+          if (el) el.textContent = msg;
+          console.log('[DEBUG]', msg);
+          window.__remoteLog(msg);
+      }
+
+      setDebugStatus('1) بدء تهيئة Firebase App...');
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      setDebugStatus('2) تم تهيئة Auth، جاري تهيئة Firestore...');
+
+      // --- محاولة تفعيل الكاش الدائم (IndexedDB)، ولو فشلت أو اتعلقت
+      //     (بيحصل كتير جوه WebView تطبيقات آيفون المُغلّفة زي volt.build)
+      //     نرجع لتخزين مؤقت في الذاكرة بس عشان التطبيق يشتغل ولا يعلق ---
+      let db;
+      try {
+          db = initializeFirestore(app, {
+              localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}),
+              experimentalForceLongPolling: true,
+              useFetchStreams: false
+          });
+      } catch (e) {
+          console.warn('فشل تفعيل الكاش الدائم، جاري استخدام كاش الذاكرة العادي:', e);
+          db = initializeFirestore(app, {
+              experimentalForceLongPolling: true,
+              useFetchStreams: false
+          });
+      }
+      setDebugStatus('3) تم تهيئة Firestore بنجاح، جاري تحميل العناصر...');
+
+      // --- Auth & Header Elements ---
+      const userActions = document.getElementById('user-actions');
+      const guestActions = document.getElementById('guest-actions');
+      const dashboardLink = document.getElementById('dashboard-link');
+      const headerProfileImg = document.getElementById('header-profile-img');
+      const loadingOverlay = document.getElementById('loading-overlay');
+      
+      const mobileUserLinks = document.getElementById('mobile-user-links');
+      const mobileGuestLinks = document.getElementById('mobile-guest-links');
+      const mobileDashboardLink = document.getElementById('mobile-dashboard-link');
+
+      const bottomNavAuthLink = document.getElementById('bottom-nav-auth-link');
+      const bottomNavAuthText = document.getElementById('bottom-nav-auth-text');
+
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuBtn) {
+          userMenuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              userDropdown.classList.toggle('active');
+          });
+      }
+      
+      document.addEventListener('click', (e) => {
+          if (userMenuBtn && !userMenuBtn.contains(e.target)) {
+              userDropdown.classList.remove('active');
+          }
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+          if (user) {
+              if(guestActions) guestActions.classList.add('auth-hidden');
+              if(mobileGuestLinks) mobileGuestLinks.classList.add('auth-hidden');
+              
+              if(userActions) userActions.classList.remove('auth-hidden');
+              if(mobileUserLinks) mobileUserLinks.classList.remove('auth-hidden');
+              
+              let dashUrl = "student-dashboard.html";
+              let photoUrl = user.photoURL;
+
+              try {
+                  const userDoc = await getDoc(doc(db, "users", user.uid));
+                  if(userDoc.exists()) {
+                      const data = userDoc.data();
+                      if(data.role === 'admin') dashUrl = "admin-dashboard.html";
+                      else if(data.role === 'instructor') dashUrl = "instructor-dashboard.html";
+                      
+                      if(data.profileImage) photoUrl = data.profileImage;
+                  }
+              } catch(e) {}
+              
+              const fullName = user.displayName || "مستخدم";
+              if(headerProfileImg) {
+                  headerProfileImg.src = photoUrl || `https://ui-avatars.com/api/?name=${fullName}&background=6D28D9&color=fff`;
+              }
+
+              if(dashboardLink) dashboardLink.href = dashUrl;
+              if(mobileDashboardLink) mobileDashboardLink.href = dashUrl;
+
+              if(bottomNavAuthLink) bottomNavAuthLink.href = dashUrl;
+              if(bottomNavAuthText) bottomNavAuthText.textContent = "لوحتي";
+
+          } else {
+              if(guestActions) guestActions.classList.remove('auth-hidden');
+              if(mobileGuestLinks) mobileGuestLinks.classList.remove('auth-hidden');
+              
+              if(userActions) userActions.classList.add('auth-hidden');
+              if(mobileUserLinks) mobileUserLinks.classList.add('auth-hidden');
+
+              if(bottomNavAuthLink) bottomNavAuthLink.href = "login.html";
+              if(bottomNavAuthText) bottomNavAuthText.textContent = "دخول";
+          }
+      });
+
+      // --- تحويل قيمة Firestore REST (typed value) لقيمة JS عادية ---
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return value.timestampValue;
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+      // --- جلب المستندات عبر REST API مباشرة بـ fetch عادي، بدل Firestore SDK
+      //     (اللي بيستخدم WebChannel/long-polling وبيتعلق جوه بعض WKWebViews) ---
+      async function fetchCoursesViaRest() {
+          const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents:runQuery?key=${firebaseConfig.apiKey}`;
+          const body = {
+              structuredQuery: {
+                  from: [{ collectionId: 'courses' }],
+                  where: {
+                      fieldFilter: {
+                          field: { fieldPath: 'status' },
+                          op: 'EQUAL',
+                          value: { stringValue: 'published' }
+                      }
+                  }
+              }
+          };
+          const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+          });
+          if (!res.ok) {
+              const errText = await res.text().catch(() => '');
+              throw new Error('REST-HTTP-' + res.status + ': ' + errText.slice(0, 300));
+          }
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const nameParts = row.document.name.split('/');
+              const id = nameParts[nameParts.length - 1];
+              results.push({ id, ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+
+
+      let allCoursesData = [];
+      let filteredCourses = [];
+      const itemsPerPage = 9;
+      let currentPage = 1;
+
+      // --- صمام أمان: لو التحميل استغرق أكتر من 8 ثواني (شبكة بطيئة/معلقة
+      //     جوه التطبيق)، اخفي شاشة التحميل بالقوة عشان المستخدم متفضلش واقف
+      //     قدام دايرة تدور للأبد من غير أي تفسير ---
+      let loadingHidden = false;
+      function hideLoadingOverlay() {
+          if (loadingHidden) return;
+          loadingHidden = true;
+          if (loadingOverlay) {
+              loadingOverlay.style.opacity = '0';
+              loadingOverlay.style.visibility = 'hidden';
+              setTimeout(() => loadingOverlay.style.display = 'none', 500);
+          }
+      }
+      const loadingSafetyTimeout = setTimeout(() => {
+          const lastStatus = document.getElementById('debug-status');
+          const lastStatusText = lastStatus ? lastStatus.textContent : '';
+          console.warn('انتهت مهلة تحميل المكتبة - جاري إخفاء الشاشة قسريًا. آخر حالة:', lastStatusText);
+          window.__remoteLog('TIMEOUT-FIRED', 'last=' + lastStatusText);
+          hideLoadingOverlay();
+          const coursesGrid = document.getElementById('courses-grid');
+          if (coursesGrid && coursesGrid.children.length === 0) {
+              coursesGrid.innerHTML = `<div style="text-align:center; color:red; grid-column:1/-1;">
+                  <p>تعذر تحميل المواد. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.</p>
+              </div>`;
+          }
+      }, 15000);
+
+      async function fetchCourses() {
+          const coursesGrid = document.getElementById('courses-grid');
+          if(!coursesGrid) return;
+          
+          try {
+              setDebugStatus('4) جاري إرسال طلب REST إلى Firestore...');
+              allCoursesData = await fetchCoursesViaRest();
+              setDebugStatus('5) تم استقبال الرد من Firestore بنجاح (REST) - عدد: ' + allCoursesData.length);
+
+              // ====== التعديل الجراحي: قراءة الرابط القادم من الرئيسية ======
+              const urlParams = new URLSearchParams(window.location.search);
+              const searchQuery = urlParams.get('search');
+              if (searchQuery) {
+                  const searchInput = document.getElementById('search-input');
+                  if (searchInput) {
+                      searchInput.value = searchQuery; // وضع الكلمة في المربع
+                  }
+              }
+              // ==============================================================
+
+              buildCategoryFilter(allCoursesData);
+              filterAndRender(); // هنا دالة الفلترة هتلاقي الكلمة موجودة وهتنفذ فوراً
+
+          } catch (error) {
+              console.error(error);
+              const errDetail = 'code=' + (error && error.code) + ' | msg=' + (error && error.message);
+              setDebugStatus('خطأ: ' + errDetail);
+              window.__remoteLog('FETCHCOURSES-CATCH', errDetail);
+              coursesGrid.innerHTML = `<div style="text-align:center; color:red; grid-column:1/-1;">
+                  <p>حدث خطأ في تحميل البيانات. يرجى التأكد من اتصالك بالإنترنت.</p>
+              </div>`;
+          } finally {
+              clearTimeout(loadingSafetyTimeout);
+              hideLoadingOverlay();
+          }
+      }
+
+      function buildCategoryFilter(courses) {
+          const container = document.getElementById('dynamic-categories-container');
+          const cats = new Set();
+          courses.forEach(c => { if(c.category) cats.add(c.category); });
+
+          container.innerHTML = '<label class="filter-option"><input type="radio" name="category" value="all" checked> الكل</label>';
+
+          const catMap = {
+              'programming': 'برمجة وتطوير',
+              'marketing': 'تسويق',
+              'design': 'تصميم',
+              'business': 'إدارة أعمال',
+              'languages': 'لغات',
+              'other': 'أخرى'
+          };
+
+          cats.forEach(cat => {
+              const label = catMap[cat] || cat;
+              const html = `<label class="filter-option"><input type="radio" name="category" value="${cat}"> ${label}</label>`;
+              container.insertAdjacentHTML('beforeend', html);
+          });
+
+          document.getElementsByName('category').forEach(r => r.addEventListener('change', () => {
+              currentPage = 1;
+              filterAndRender();
+          }));
+      }
+
+      function filterAndRender() {
+          const searchInput = document.getElementById('search-input');
+          const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+          
+          let selectedCat = 'all';
+          const catRadios = document.getElementsByName('category');
+          for(let r of catRadios) if(r.checked) selectedCat = r.value;
+
+          let selectedPrice = 'all';
+          const priceRadios = document.getElementsByName('price');
+          for(let r of priceRadios) if(r.checked) selectedPrice = r.value;
+
+          const levelChecks = document.querySelectorAll('.level-check');
+          const selectedLevels = Array.from(levelChecks).filter(c => c.checked).map(c => c.value);
+
+          filteredCourses = allCoursesData.filter(course => {
+              const matchesSearch = course.title.toLowerCase().includes(searchTerm);
+              const matchesCat = selectedCat === 'all' || course.category === selectedCat;
+              const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(course.level);
+              
+              let matchesPrice = true;
+              if (selectedPrice === 'paid') matchesPrice = course.price > 0;
+              if (selectedPrice === 'free') matchesPrice = course.price === 0;
+
+              return matchesSearch && matchesCat && matchesLevel && matchesPrice;
+          });
+
+          const sortSelect = document.getElementById('sort-select');
+          if(sortSelect) {
+              const sortValue = sortSelect.value;
+              filteredCourses.sort((a, b) => {
+                  const timeA = a.createdAt?.seconds || 0;
+                  const timeB = b.createdAt?.seconds || 0;
+                  
+                  if (sortValue === 'price-low') return (a.price || 0) - (b.price || 0);
+                  if (sortValue === 'price-high') return (b.price || 0) - (a.price || 0);
+                  if (sortValue === 'oldest') return timeA - timeB;
+                  return timeB - timeA; // default 'newest'
+              });
+          }
+
+          document.getElementById('courses-count').textContent = filteredCourses.length;
+          renderPagination();
+      }
+
+      function renderPagination() {
+          const coursesGrid = document.getElementById('courses-grid');
+          const paginationControls = document.getElementById('pagination-controls');
+          const pageNumbers = document.getElementById('page-numbers');
+          const prevBtn = document.getElementById('prev-page');
+          const nextBtn = document.getElementById('next-page');
+
+          const totalPages = Math.ceil(filteredCourses.length / itemsPerPage);
+          
+          if(totalPages <= 1) {
+              paginationControls.style.display = 'none';
+              renderPageItems(filteredCourses);
+              return;
+          }
+
+          paginationControls.style.display = 'flex';
+          
+          if(currentPage > totalPages) currentPage = totalPages;
+          if(currentPage < 1) currentPage = 1;
+
+          const start = (currentPage - 1) * itemsPerPage;
+          const end = start + itemsPerPage;
+          const pageItems = filteredCourses.slice(start, end);
+
+          renderPageItems(pageItems);
+
+          pageNumbers.innerHTML = '';
+          for(let i=1; i<=totalPages; i++) {
+              const btn = document.createElement('button');
+              btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+              btn.textContent = i;
+              btn.onclick = () => { currentPage = i; renderPagination(); window.scrollTo(0,0); };
+              pageNumbers.appendChild(btn);
+          }
+
+          prevBtn.disabled = currentPage === 1;
+          nextBtn.disabled = currentPage === totalPages;
+
+          prevBtn.onclick = () => { if(currentPage > 1) { currentPage--; renderPagination(); window.scrollTo(0,0); } };
+          nextBtn.onclick = () => { if(currentPage < totalPages) { currentPage++; renderPagination(); window.scrollTo(0,0); } };
+      }
+
+      function renderPageItems(courses) {
+          const coursesGrid = document.getElementById('courses-grid');
+          coursesGrid.innerHTML = '';
+
+          if (courses.length === 0) {
+              coursesGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #777; background: rgba(255,255,255,0.4); border-radius: 20px;">
+                    <i class="fas fa-search" style="font-size: 40px; margin-bottom: 15px; color: rgba(0,0,0,0.2);"></i>
+                    <p style="font-size: 16px; font-weight: bold;">لا توجد مواد تطابق بحثك.</p>
+                </div>`;
+              return;
+          }
+
+          courses.forEach(course => {
+              const priceDisplay = course.price > 0 ? `$${course.price}` : 'مجاني';
+              const thumb = course.thumbnail || 'https://via.placeholder.com/300x200';
+
+              const html = `
+                <div class="course-card">
+                    <img src="${thumb}" alt="${course.title}" class="course-thumb">
+                    <div class="course-content">
+                        <div style="text-align: right; direction: rtl; margin-bottom: 10px;">
+                            <span class="course-cat">${course.category || 'عام'}</span>
+                        </div>
+                        <h3 class="course-title">${course.title}</h3>
+                        <div class="course-instructor">
+                            <span><i class="fas fa-user-circle"></i> ${course.instructorName || 'دكتور'}</span>
+                        </div>
+                        <div class="course-footer">
+                            <span class="course-price ios-hidden">${priceDisplay}</span>
+                            <a href="course-details.html?id=${course.id}" class="btn-details-elegant">تصفح المادة <i class="fas fa-arrow-left"></i></a>
+                        </div>
+                    </div>
+                </div>
+              `;
+              coursesGrid.insertAdjacentHTML('beforeend', html);
+          });
+      }
+
+      document.getElementById('search-input').addEventListener('input', () => { currentPage=1; filterAndRender(); });
+      document.getElementById('sort-select').addEventListener('change', filterAndRender);
+      
+      try { document.getElementsByName('price').forEach(r => r.addEventListener('change', () => { currentPage=1; filterAndRender(); })); } catch(e){}
+
+      fetchCourses();
+
+      const logoutBtn = document.getElementById('logout-btn');
+      if(logoutBtn) logoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await signOut(auth); window.location.reload(); });
+
+      const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+      if(mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', async (e) => { e.preventDefault(); await signOut(auth); window.location.reload(); });
+    </script>
+</body>
+</html>

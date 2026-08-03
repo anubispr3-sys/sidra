@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>قصتنا ورؤيتنا - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- روح التطبيق الأصلي (Native App Feel) --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; }
+
+        /* --- تأثير Glassmorphism للواجهة الأساسية --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        /* --- تنسيقات قائمة المستخدم الاحترافية --- */
+        .user-header-profile { position: relative; cursor: pointer; display: flex; align-items: center; margin-right: auto; }
+        .user-header-profile img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color); padding: 2px; background-color: white; transition: 0.2s;}
+        .user-header-profile img:active { transform: scale(0.95); }
+        .user-dropdown { display: none; position: absolute; top: 55px; left: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(25px); box-shadow: 0 15px 50px rgba(0,0,0,0.15); border-radius: 20px; width: 180px; z-index: 1000; flex-direction: column; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+        .user-dropdown.active { display: flex; animation: fadeIn 0.2s ease; }
+        .user-dropdown a { padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; font-family: 'Tajawal'; font-size: 14px; display: flex; gap: 10px; align-items: center; font-weight: 600;}
+        .user-dropdown a:hover { background-color: rgba(255,255,255,0.6); color: var(--primary-color); }
+        .user-dropdown i { width: 15px; text-align: center; color: var(--text-light); }
+        .user-dropdown a:hover i { color: var(--primary-color); }
+        .user-dropdown .logout-link { color: #e74c3c; }
+        .user-dropdown .logout-link i { color: #e74c3c; }
+        .user-dropdown .logout-link:hover { background-color: #fdf2f2; color: #e74c3c; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- تحسين قسم الهيرو ليتوافق كواجهة تطبيق --- */
+        .about-hero-section-v2 {
+            padding: 80px 20px;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        .about-hero-section-v2 .hero-text {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* --- الكروت الزجاجية للأهداف والدكاترة --- */
+        .goals-section, .instructors-section, .alternating-layout-section {
+            background-color: transparent !important;
+            padding: 60px 0;
+        }
+
+        .goal-card, .instructor-card {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+            border-radius: 24px !important;
+            padding: 35px 25px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .goal-card:hover, .instructor-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.08) !important;}
+        
+        .goal-card h4 { color: #111827; font-weight: 800; font-size: 18px; }
+        .goal-card p { color: #4b5563; font-size: 14px; line-height: 1.7; }
+        .goal-icon { color: var(--primary-color); font-size: 40px; margin-bottom: 20px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+
+        .instructor-img-box { width: 110px; height: 110px; margin: 0 auto 15px; position: relative; }
+        .instructor-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.8); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .instructor-name { font-weight: 800; color: #111827; margin-bottom: 5px; font-size: 17px; }
+        .instructor-bio { font-size: 13px; color: #4b5563; line-height: 1.6; height: 42px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+        /* --- تنسيقات قسم (رسالتنا ورؤيتنا) --- */
+        .alternating-image img {
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        .alternating-text h3 { color: #111827; font-weight: 800; }
+        .alternating-text p { color: #444; line-height: 1.8; font-size: 15px;}
+
+        /* --- Pagination (Glassmorphism) --- */
+        .pagination-wrapper { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 50px; }
+        .nav-btn { 
+            background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6); 
+            backdrop-filter: blur(10px); width: 45px; height: 45px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            color: #333; transition: 0.2s; font-size: 16px;
+        }
+        .nav-btn:active { transform: scale(0.9); }
+        .nav-btn:hover:not(:disabled) { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 15px rgba(109,40,217,0.3);}
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* --- تنسيقات الشريط السفلي للموبايل (معدل لمنع التكسر) --- */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #64748b; text-decoration: none; font-size: 11px; font-weight: 600; flex: 1; transition: 0.3s; font-family: 'Tajawal'; padding: 12px 0 8px 0;}
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary-color); }
+        
+        @media (max-width: 992px) { 
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .mobile-bottom-nav { display: flex; } /* Flexbox مفعل مباشرة على الناف */
+            .main-footer { display: none; }
+            .main-header { display: none; }
+            .about-hero-section-v2 { padding: 60px 20px; border-radius: 0 0 25px 25px; }
+            .about-hero-section-v2 .hero-text { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            <nav class="main-nav">
+                <a href="courses.html">المكتبة</a>
+                <a href="about.html" class="active">من نحن</a>
+                <a href="privacy-policy.html">الشروط والخصوصية</a>
+            </nav>
+            
+            <div class="header-actions">
+                <div id="guest-actions" class="guest-actions">
+                    <a href="login.html" class="btn btn-secondary">تسجيل الدخول</a>
+                    <a href="register.html" class="btn btn-primary" style="border-radius: 12px;">ابدأ التعلم الآن</a>
+                </div>
+
+                <div class="user-header-profile auth-hidden" id="user-actions">
+                    <div id="user-menu-btn">
+                        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="User" id="header-profile-img">
+                    </div>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <a href="#" id="dashboard-link"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+                        <a href="profile-settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+                        <hr style="margin: 0; border: 0; border-top: 1px solid rgba(0,0,0,0.05);">
+                        <a href="#" id="logout-btn" class="logout-link"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+        <section class="about-hero-section-v2" style="background-image: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.85)), url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973&auto=format&fit=crop'); background-size: cover; background-position: center;">
+            <div class="container">
+                <div class="hero-text">
+                    <h1 style="color: white; margin-top: 0;">نحن لا نُعلّم فقط، بل نصنع قادة المستقبل</h1>
+                    <p style="color: rgba(255,255,255,0.9); font-size: 16px;">قصتنا هي قصة شغف بالمعرفة وإيمان بقدرة التعليم على تغيير حياة الملايين في عالمنا العربي.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="alternating-layout-section">
+            <div class="container">
+                <div class="alternating-row">
+                    <div class="alternating-image">
+                        <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop" alt="رسالتنا">
+                    </div>
+                    <div class="alternating-text">
+                        <h3>رسالتنا</h3>
+                        <p>توفير تجربة تعليمية رقمية استثنائية باللغة العربية، تمكّن المتعلمين من اكتساب مهارات عملية وحديثة تفتح لهم آفاقًا وظيفية جديدة وتساعدهم على تحقيق طموحاتهم الأكاديمية.</p>
+                    </div>
+                </div>
+                <div class="alternating-row reverse">
+                    <div class="alternating-image">
+                        <img src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=2074&auto=format&fit=crop" alt="رؤيتنا">
+                    </div>
+                    <div class="alternating-text">
+                        <h3>رؤيتنا</h3>
+                        <p>أن نصبح المنصة التعليمية الرائدة والموثوقة في العالم العربي، وبناء أكبر مجتمع من الخبراء والمتعلمين الشغوفين بالتطوير المستمر والابتكار.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="goals-section">
+            <div class="container">
+                <h2 class="section-title">أهدافنا</h2>
+                <div class="goals-grid">
+                    <div class="goal-card">
+                        <i class="fas fa-check-double goal-icon"></i>
+                        <h4>جودة المحتوى</h4>
+                        <p>تقديم مواد تعليمية بمعايير عالمية تضمن للمتعلم الحصول على قيمة حقيقية وموثوقة.</p>
+                    </div>
+                    <div class="goal-card">
+                        <i class="fas fa-expand-arrows-alt goal-icon"></i>
+                        <h4>سهولة الوصول</h4>
+                        <p>جعل التعليم متاحًا للجميع في أي وقت ومن أي مكان عبر واجهة مستخدم سلسة ومرنة.</p>
+                    </div>
+                    <div class="goal-card">
+                        <i class="fas fa-briefcase goal-icon"></i>
+                        <h4>ربط بسوق العمل</h4>
+                        <p>تصميم مسارات دراسية تركز على المهارات العملية المطلوبة وتأهيل الطلاب للمستقبل.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="instructors-section">
+            <div class="container">
+                <h2 class="section-title">نخبة الدكاترة</h2>
+                <p style="text-align: center; color: #555; max-width: 600px; margin: 0 auto 40px; font-weight: 500;">
+                    فريق من الخبراء والمحترفين المكرسين لنقل خبراتهم إليك بأفضل جودة.
+                </p>
+
+                <div id="instructors-container" class="instructors-grid">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #555;">
+                        <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-color); margin-bottom: 15px;"></i><br>
+                        جاري تحميل البيانات...
+                    </div>
+                </div>
+
+                <div class="pagination-wrapper" id="pagination-controls" style="display: none;">
+                    <button class="nav-btn" id="prev-btn" disabled><i class="fas fa-chevron-right"></i></button>
+                    <span id="page-indicator" style="font-weight: bold; color: #333;">1</span>
+                    <button class="nav-btn" id="next-btn"><i class="fas fa-chevron-left"></i></button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">Sidra Academy</h3>
+                    <p>منصة تعليمية تهدف لتمكين الأفراد من خلال توفير محتوى عربي عالي الجودة.</p>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">روابط سريعة</h3>
+                    <ul>
+                        <li><a href="courses.html">تصفح المكتبة</a></li>
+                        <li class="ios-hidden"><a href="register.html?role=instructor">كن دكتوراً معنا</a></li>
+                        <li><a href="privacy-policy.html">الشروط والخصوصية</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="about.html" class="nav-item active">
+            <i class="fas fa-info-circle"></i>
+            <span>من نحن</span>
+        </a>
+        <a href="login.html" class="nav-item" id="bottom-nav-auth-link">
+            <i class="fas fa-user"></i>
+            <span id="bottom-nav-auth-text">حسابي</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      // التعديل 1: استيراد تهيئة الـ Auth والتخزين المحلي
+      import { initializeAuth, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      // التعديل 2: فرض استخدام الـ LocalStorage المدعوم في iOS
+      const auth = initializeAuth(app, {
+          persistence: browserLocalPersistence
+      });
+
+      // ================================================================
+      // التعديل 3: طبقة REST بديلة عن Firestore SDK (لحجب التعليق في iOS)
+      // ================================================================
+      const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+
+      function toFirestoreValue(v) {
+          if (v === null || v === undefined) return { nullValue: null };
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+          if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+          if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+          return { stringValue: String(v) };
+      }
+
+      function jsToFirestoreFields(obj) {
+          const fields = {};
+          for (const key in obj) fields[key] = toFirestoreValue(obj[key]);
+          return fields;
+      }
+
+      async function getRestHeaders() {
+          const headers = { 'Content-Type': 'application/json' };
+          if (auth.currentUser) {
+              try {
+                  const token = await auth.currentUser.getIdToken();
+                  if (token) {
+                      headers['Authorization'] = `Bearer ${token}`;
+                  }
+              } catch (e) { console.error("Error getting auth token:", e); }
+          }
+          return headers;
+      }
+
+      async function restGetDoc(path) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('REST Error');
+          const docJson = await res.json();
+          return firestoreFieldsToJs(docJson.fields || {});
+      }
+
+      async function restRunQuery(collectionId, filters, opts) {
+          opts = opts || {};
+          const fieldFilters = (filters || []).map(f => {
+              const op = f.op || 'EQUAL';
+              const value = op === 'IN' ? { arrayValue: { values: (f.value || []).map(toFirestoreValue) } } : toFirestoreValue(f.value);
+              return { fieldFilter: { field: { fieldPath: f.field }, op, value } };
+          });
+          let where;
+          if (fieldFilters.length === 1) where = fieldFilters[0];
+          else if (fieldFilters.length > 1) where = { compositeFilter: { op: 'AND', filters: fieldFilters } };
+
+          const structuredQuery = { from: [{ collectionId }] };
+          if (where) structuredQuery.where = where;
+          if (opts.orderByField) structuredQuery.orderBy = [{ field: { fieldPath: opts.orderByField }, direction: opts.orderByDir === 'desc' ? 'DESCENDING' : 'ASCENDING' }];
+          if (opts.limit) structuredQuery.limit = opts.limit;
+
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:runQuery?key=${firebaseConfig.apiKey}`, {
+              method: 'POST',
+              headers: headers,
+              body: JSON.stringify({ structuredQuery })
+          });
+          if (!res.ok) throw new Error('REST-HTTP-' + res.status + ': ' + (await res.text()).slice(0, 300));
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const parts = row.document.name.split('/');
+              results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+      // ================================================================
+
+      const guestActions = document.getElementById('guest-actions');
+      const userActions = document.getElementById('user-actions');
+      const headerProfileImg = document.getElementById('header-profile-img');
+      const bottomNavAuthLink = document.getElementById('bottom-nav-auth-link');
+      const bottomNavAuthText = document.getElementById('bottom-nav-auth-text');
+      const dashboardLink = document.getElementById('dashboard-link');
+
+      // Dropdown Logic
+      const userMenuBtn = document.getElementById('user-menu-btn');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuBtn) {
+          userMenuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              userDropdown.classList.toggle('active');
+          });
+      }
+      
+      document.addEventListener('click', (e) => {
+          if (userMenuBtn && !userMenuBtn.contains(e.target)) {
+              userDropdown.classList.remove('active');
+          }
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            if(guestActions) guestActions.classList.add('auth-hidden');
+            if(userActions) userActions.classList.remove('auth-hidden');
+            
+            let dashUrl = "student-dashboard.html";
+            let photoUrl = user.photoURL;
+
+            try {
+                const userData = await restGetDoc(`users/${user.uid}`);
+                if(userData) {
+                    if(userData.role === 'admin') dashUrl = "admin-dashboard.html";
+                    else if(userData.role === 'instructor') dashUrl = "instructor-dashboard.html";
+                    if(userData.profileImage) photoUrl = userData.profileImage;
+                }
+            } catch(e) {}
+            
+            const fullName = user.displayName || "مستخدم";
+            if(headerProfileImg) {
+                headerProfileImg.src = photoUrl || `https://ui-avatars.com/api/?name=${fullName}&background=6D28D9&color=fff`;
+            }
+
+            if(dashboardLink) dashboardLink.href = dashUrl;
+            if(bottomNavAuthLink) bottomNavAuthLink.href = dashUrl;
+            if(bottomNavAuthText) bottomNavAuthText.textContent = "لوحتي";
+            
+        } else {
+            if(guestActions) guestActions.classList.remove('auth-hidden');
+            if(userActions) userActions.classList.add('auth-hidden');
+            if(bottomNavAuthLink) bottomNavAuthLink.href = "login.html";
+            if(bottomNavAuthText) bottomNavAuthText.textContent = "حسابي";
+        }
+      });
+
+      const handleLogout = async (e) => {
+          e.preventDefault();
+          try { await signOut(auth); window.location.href = "login.html"; } catch (error) { console.error(error); }
+      };
+      const logoutBtn = document.getElementById('logout-btn');
+      if(logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+
+      const instructorsContainer = document.getElementById('instructors-container');
+      const paginationControls = document.getElementById('pagination-controls');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const pageIndicator = document.getElementById('page-indicator');
+
+      let allInstructors = [];
+      let currentPage = 1;
+      const ITEMS_PER_PAGE = 10;
+
+      async function loadInstructors() {
+          try {
+              // التعديل 4: استخدام دالة الـ REST بدلاً من getDocs التي كانت تسبب التعليق
+              const results = await restRunQuery('users', [
+                  { field: 'role', value: 'instructor' },
+                  { field: 'status', value: 'active' }
+              ]);
+              
+              allInstructors = results;
+
+              if (allInstructors.length === 0) {
+                  instructorsContainer.innerHTML = '<p style="grid-column:1/-1; text-align:center; color: #666; font-weight: bold;">لا يوجد دكاترة مسجلين حالياً.</p>';
+                  return;
+              }
+              renderPage(1);
+          } catch (error) {
+              console.error("Error loading instructors:", error);
+              instructorsContainer.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:red;">فشل تحميل البيانات.</p>';
+          }
+      }
+
+      function renderPage(page) {
+          currentPage = page;
+          const totalPages = Math.ceil(allInstructors.length / ITEMS_PER_PAGE);
+          const start = (page - 1) * ITEMS_PER_PAGE;
+          const end = start + ITEMS_PER_PAGE;
+          const currentItems = allInstructors.slice(start, end);
+
+          instructorsContainer.innerHTML = '';
+          currentItems.forEach(inst => {
+              const img = inst.profileImage || 'https://via.placeholder.com/150';
+              const name = inst.name || 'دكتور';
+              const bio = inst.bio || 'خبير معتمد في مجال التدريس الأكاديمي.';
+
+              const card = `
+                <div class="instructor-card">
+                    <div class="instructor-img-box">
+                        <img src="${img}" alt="${name}" class="instructor-img">
+                    </div>
+                    <div class="instructor-name">${name}</div>
+                    <div class="instructor-bio">${bio}</div>
+                </div>
+              `;
+              instructorsContainer.insertAdjacentHTML('beforeend', card);
+          });
+
+          if (allInstructors.length > ITEMS_PER_PAGE) {
+              paginationControls.style.display = 'flex';
+              pageIndicator.textContent = `${currentPage} / ${totalPages}`;
+              prevBtn.disabled = currentPage === 1;
+              nextBtn.disabled = currentPage === totalPages;
+          } else {
+              paginationControls.style.display = 'none';
+          }
+      }
+
+      prevBtn.addEventListener('click', () => { if (currentPage > 1) renderPage(currentPage - 1); });
+      nextBtn.addEventListener('click', () => {
+          const totalPages = Math.ceil(allInstructors.length / ITEMS_PER_PAGE);
+          if (currentPage < totalPages) renderPage(currentPage + 1);
+      });
+
+      loadInstructors();
+    </script>
+</body>
+</html>

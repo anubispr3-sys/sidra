@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>إعدادات الحساب - Sidra Academy</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="student-dashboard.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- روح التطبيق الأصلي ومراعاة الـ Safe Area --- */
+        body {
+            -webkit-user-select: none; user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+            min-height: 100vh;
+        }
+
+        input, select, textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+        }
+
+        .auth-hidden { display: none !important; }
+        .ios-hidden { display: none !important; }
+
+        /* --- تأثير Glassmorphism (شفافية وضبابية وبدون حواف) للواجهة الأساسية --- */
+        .main-header, .mobile-bottom-nav {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: none !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .dashboard-sidebar, .settings-card {
+            background: rgba(255, 255, 255, 0.4) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        /* --- حقول الإدخال بأسلوب iOS --- */
+        .form-control {
+            background: rgba(255, 255, 255, 0.5) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 12px 15px !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+            font-family: 'Tajawal', sans-serif;
+            color: #333;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.8) !important;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.3) !important;
+        }
+
+        /* --- القوائم المنسدلة والإشعارات --- */
+        .user-dropdown, .notification-dropdown {
+            background: rgba(255, 255, 255, 0.95) !important; 
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
+            border-radius: 20px !important;
+            overflow: hidden;
+        }
+        
+        .user-header-profile { position: relative; display: flex; align-items: center; gap: 20px; }
+        #user-menu-btn { cursor: pointer; }
+        #user-menu-btn img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary-color); padding: 2px; background-color: white; transition: 0.2s; }
+        #user-menu-btn img:active { transform: scale(0.95); }
+        .user-dropdown { display: none; position: absolute; top: 60px; left: 0; z-index: 1000; flex-direction: column; }
+        .user-dropdown.active { display: flex; animation: fadeIn 0.2s ease; }
+        .user-dropdown a { padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid rgba(0,0,0,0.05); transition: 0.2s; font-family: 'Tajawal'; font-size: 14px; display: flex; gap: 10px; align-items: center; font-weight: 600; }
+        .user-dropdown a:hover { background-color: rgba(255,255,255,0.6); color: var(--primary-color); }
+        .user-dropdown i { width: 15px; text-align: center; color: var(--text-light); }
+        .user-dropdown a:hover i { color: var(--primary-color); }
+        .user-dropdown .logout-link { color: #e74c3c; }
+        .user-dropdown .logout-link i { color: #e74c3c; }
+        .user-dropdown .logout-link:hover { background-color: #fdf2f2; color: #e74c3c; }
+
+        /* --- تنسيقات نظام الإشعارات --- */
+        .notification-bell { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .notification-bell i { font-size: 22px; color: #555; }
+        .notification-dropdown {
+            position: absolute; top: 50px; left: -10px; width: 320px;
+            display: none; z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+        .notification-dropdown.active { display: block; }
+        .notif-header { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); background: #ffffff; font-weight: bold; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .notif-header span { font-size: 14px; }
+        .notif-count-label { background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .notif-list { max-height: 350px; overflow-y: auto; }
+        .notif-item { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: flex-start; gap: 12px; transition: 0.2s; background: transparent;}
+        .notif-item:hover { background: #f9fafb; }
+        .notif-item.unread { background-color: #f0f9ff; }
+        .notif-icon-box { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+        .type-info { background: #e0f2fe; color: #0284c7; }
+        .type-success { background: #dcfce7; color: #16a34a; }
+        .type-warning { background: #fef9c3; color: #ca8a04; }
+        .type-alert { background: #fee2e2; color: #dc2626; }
+        .notif-content h5 { margin: 0 0 5px; font-size: 14px; color: #333; }
+        .notif-content p { margin: 0 0 5px; font-size: 12px; color: #555; line-height: 1.4; }
+        .notif-time { font-size: 10px; color: #777; }
+        .badge { display: none; position: absolute; top: -5px; right: -8px; background: #e74c3c; color: white; border-radius: 50%; padding: 2px 5px; font-size: 10px; font-weight: bold; border: 2px solid white; } 
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* تنسيقات خاصة بالصفحة */
+        .settings-card { padding: 30px; max-width: 800px; margin: 0 auto; margin-bottom: 25px; }
+        .profile-upload-section { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+        .current-photo img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .upload-controls { display: flex; flex-direction: column; gap: 5px; }
+        .upload-hint { font-size: 12px; color: #666; margin: 0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #333; }
+        
+        .btn-ios { border-radius: 12px; padding: 12px 20px; font-weight: bold; cursor: pointer; border: none; font-family: 'Tajawal'; transition: 0.2s; }
+        .btn-ios:active { transform: scale(0.96); }
+
+        @media(max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+        
+        /* Mobile Fix */
+        @media (max-width: 992px) {
+            body { padding-bottom: calc(75px + env(safe-area-inset-bottom)); }
+            .mobile-menu-toggle { display: none !important; }
+            .notification-bell { position: static; }
+            .notification-dropdown {
+                position: fixed !important; top: 75px !important; left: 5% !important;
+                width: 90% !important; max-width: none !important; transform: none !important;
+                box-shadow: 0 10px 100px rgba(0,0,0,0.3) !important; z-index: 99999 !important;
+            }
+            .notif-list { max-height: 50vh; }
+            .main-footer { display: none; }
+        }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <div id="loading-overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column;">
+        <i class="fas fa-spinner fa-spin fa-3x" style="color: var(--primary-color);"></i>
+        <p style="margin-top: 15px; font-weight: bold; color: #333;">جاري تحميل البيانات...</p>
+    </div>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="logo">Sidra Academy</a>
+            
+            <nav class="main-nav">
+                <a href="courses.html">تصفح المكتبة</a>
+                <a href="student-dashboard.html">لوحة التحكم</a>
+            </nav>
+            
+            <div class="user-header-profile" id="user-header-profile">
+                
+                <div class="notification-bell" id="bell-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge" id="notif-badge" style="display: none;"></span>
+                    <div class="notification-dropdown" id="notif-dropdown">
+                        <div class="notif-header">
+                            <span>الإشعارات</span>
+                            <span class="notif-count-label" id="dropdown-count">0 جديد</span>
+                        </div>
+                        <div class="notif-list" id="notif-list">
+                            <p style="text-align:center; padding:20px; color:#999; font-size:12px;">جاري التحميل...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-info-trigger" id="user-menu-btn">
+                    <img src="https://via.placeholder.com/150" alt="User" id="header-profile-img">
+                </div>
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="student-dashboard.html"><i class="fas fa-user"></i> الملف الشخصي</a>
+                    <a href="profile-settings.html"><i class="fas fa-cog"></i> الإعدادات</a>
+                    <hr style="margin: 5px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.05);">
+                    <a href="#" id="logout-btn" class="logout-link"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+                </div>
+            </div>
+
+            <button class="mobile-menu-toggle" id="mobile-menu-toggle" style="display: none;">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav" id="mobile-nav">
+            <a href="courses.html">تصفح المكتبة</a>
+            <a href="student-dashboard.html">لوحة التحكم</a>
+            <a href="#" id="mobile-logout-btn">تسجيل الخروج</a>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-layout">
+                
+                <aside class="dashboard-sidebar">
+                    <div class="user-sidebar-info">
+                        <img src="https://via.placeholder.com/150" alt="User" id="sidebar-profile-img">
+                        <h3 id="sidebar-user-name">...</h3>
+                        <p>طالب</p>
+                    </div>
+                    <nav class="sidebar-menu">
+                        <a href="student-dashboard.html"><i class="fas fa-book-open"></i> مكتبتي</a>
+                        <a href="my-certificates.html"><i class="fas fa-certificate"></i> شهاداتي</a>
+                        <a href="profile-settings.html" class="active"><i class="fas fa-cog"></i> إعدادات الحساب</a>
+                    </nav>
+                </aside>
+
+                <main class="dashboard-main">
+                    <div class="settings-card">
+                        <h3 style="margin-top:0; margin-bottom:20px; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:15px;">تعديل الملف الشخصي</h3>
+                        
+                        <form id="profile-form">
+                            <div class="profile-upload-section">
+                                <div class="current-photo">
+                                    <img src="https://via.placeholder.com/150" alt="Profile" id="settings-profile-preview">
+                                </div>
+                                <div class="upload-controls">
+                                    <div class="upload-btn-wrapper" style="position:relative; overflow:hidden; display:inline-block;">
+                                        <button type="button" class="btn-ios" onclick="document.getElementById('file-input').click()" style="background: rgba(255,255,255,0.6); color:#333; border: 1px solid rgba(0,0,0,0.1);">تغيير الصورة</button>
+                                        <input type="file" id="file-input" accept="image/*" style="font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0;">
+                                    </div>
+                                    <p class="upload-hint">يفضل صورة مربعة (PNG, JPG)</p>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>الاسم الأول</label>
+                                    <input type="text" id="firstName" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>الاسم الأخير</label>
+                                    <input type="text" id="lastName" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>البريد الإلكتروني</label>
+                                <input type="email" id="emailInput" class="form-control" disabled title="لا يمكن تغيير البريد الإلكتروني" style="opacity: 0.6; cursor:not-allowed;">
+                            </div>
+
+                            <br><hr style="border-top:1px solid rgba(0,0,0,0.05); margin: 20px 0;"><br>
+
+                            <h3 style="font-size: 16px; margin-bottom: 15px;">تغيير كلمة المرور</h3>
+                            <div class="form-group">
+                                <label>كلمة المرور الحالية <span style="color: #e74c3c; font-size: 0.8em; font-weight: normal;">(مطلوبة للتغيير)</span></label>
+                                <input type="password" id="currentPassword" placeholder="********" class="form-control">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>كلمة المرور الجديدة</label>
+                                    <input type="password" id="newPassword" placeholder="كلمة مرور جديدة" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>تأكيد كلمة المرور</label>
+                                    <input type="password" id="confirmPassword" placeholder="أعد كتابة كلمة المرور" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-actions" style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+                                <button type="button" class="btn-ios" onclick="window.location.reload()" style="background: rgba(0,0,0,0.05); color: #333;">إلغاء</button>
+                                <button type="submit" id="save-btn" class="btn-ios" style="background: var(--primary-color); color: white;">حفظ التغييرات</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3 style="margin-top:0; margin-bottom:15px; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:15px; font-size: 16px;">إدارة الحساب</h3>
+                        <p style="font-size: 14px; color: #555; margin-bottom: 20px;">حذف الحساب سيؤدي إلى مسح كافة بياناتك وموادك من المنصة نهائياً. لا يمكن التراجع عن هذا الإجراء.</p>
+                        
+                        <div id="delete-init-section">
+                            <button type="button" id="btn-init-delete" style="background-color: transparent; color: #e74c3c; border: none; font-family: 'Tajawal', sans-serif; padding: 10px 0; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; text-align: right; width: 100%;">
+                                حذف الحساب...
+                            </button>
+                        </div>
+
+                        <div id="delete-confirm-section" style="display: none; background-color: rgba(255,255,255,0.5); padding: 20px; border-radius: 16px; margin-top: 15px; border: 1px solid rgba(0,0,0,0.05);">
+                            <p style="color: #333; font-weight: bold; margin-top: 0;">هل أنت متأكد من قرارك؟</p>
+                            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">سيتم تفعيل زر التأكيد بعد <span id="delete-timer-span" style="font-weight:bold; font-size: 16px; color: #e74c3c;">10</span> ثوانٍ...</p>
+                            
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label style="color: #333; font-size: 13px;">لتأكيد هويتك، يرجى إدخال كلمة المرور:</label>
+                                <input type="password" id="deleteConfirmPassword" class="form-control" placeholder="كلمة المرور الخاصة بك">
+                            </div>
+
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" id="btn-confirm-delete" disabled class="btn-ios" style="background-color: #ccc; color: white; cursor: not-allowed; flex: 1;">تأكيد الحذف</button>
+                                <button type="button" id="btn-cancel-delete" class="btn-ios" style="background: rgba(0,0,0,0.05); color: #333; flex: 1;">تراجع</button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Sidra Academy. كل الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="courses.html" class="nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة</span>
+        </a>
+        <a href="student-dashboard.html" class="nav-item active" id="bottom-nav-auth-link">
+            <i class="fas fa-user-circle"></i>
+            <span id="bottom-nav-auth-text">لوحتي</span>
+        </a>
+    </nav>
+    <div id="notification-container" style="position:fixed; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10002; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <script src="script.js"></script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
+        authDomain: "sidra-855f2.firebaseapp.com",
+        projectId: "sidra-855f2",
+        storageBucket: "sidra-855f2.firebasestorage.app",
+        messagingSenderId: "724377690776",
+        appId: "1:724377690776:web:59eae07eaac8862900e6ed",
+        measurementId: "G-WD5BZ4S0S4"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const storage = getStorage(app);
+
+      // ================================================================
+      // طبقة REST بديلة عن Firestore SDK مع دعم الـ Auth Token
+      // ================================================================
+      const FS_BASE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+      function firestoreValueToJs(value) {
+          if (!value) return null;
+          if ('stringValue' in value) return value.stringValue;
+          if ('integerValue' in value) return parseInt(value.integerValue, 10);
+          if ('doubleValue' in value) return value.doubleValue;
+          if ('booleanValue' in value) return value.booleanValue;
+          if ('nullValue' in value) return null;
+          if ('timestampValue' in value) return { seconds: Math.floor(new Date(value.timestampValue).getTime() / 1000) };
+          if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValueToJs);
+          if ('mapValue' in value) return firestoreFieldsToJs(value.mapValue.fields || {});
+          return null;
+      }
+
+      function firestoreFieldsToJs(fields) {
+          const out = {};
+          for (const key in fields) out[key] = firestoreValueToJs(fields[key]);
+          return out;
+      }
+
+      function toFirestoreValue(v) {
+          if (v === null || v === undefined) return { nullValue: null };
+          if (typeof v === 'boolean') return { booleanValue: v };
+          if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+          if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
+          if (typeof v === 'object') return { mapValue: { fields: jsToFirestoreFields(v) } };
+          return { stringValue: String(v) };
+      }
+
+      function jsToFirestoreFields(obj) {
+          const fields = {};
+          for (const key in obj) fields[key] = toFirestoreValue(obj[key]);
+          return fields;
+      }
+
+      async function getRestHeaders() {
+          const headers = { 'Content-Type': 'application/json' };
+          if (auth.currentUser) {
+              try {
+                  const token = await auth.currentUser.getIdToken();
+                  if (token) {
+                      headers['Authorization'] = `Bearer ${token}`;
+                  }
+              } catch (e) { console.error("Error getting auth token:", e); }
+          }
+          return headers;
+      }
+
+      async function restGetDoc(path) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE}/${path}?key=${firebaseConfig.apiKey}`, { headers });
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error('REST Error');
+          const docJson = await res.json();
+          return firestoreFieldsToJs(docJson.fields || {});
+      }
+
+      async function restRunQuery(collectionId, filters, opts = {}) {
+          const fieldFilters = (filters || []).map(f => {
+              const op = f.op || 'EQUAL';
+              const value = op === 'IN' ? { arrayValue: { values: (f.value || []).map(toFirestoreValue) } } : toFirestoreValue(f.value);
+              return { fieldFilter: { field: { fieldPath: f.field }, op, value } };
+          });
+          let where = fieldFilters.length === 1 ? fieldFilters[0] : (fieldFilters.length > 1 ? { compositeFilter: { op: 'AND', filters: fieldFilters } } : undefined);
+
+          const structuredQuery = { from: [{ collectionId }] };
+          if (where) structuredQuery.where = where;
+          if (opts.orderByField) structuredQuery.orderBy = [{ field: { fieldPath: opts.orderByField }, direction: opts.orderByDir === 'desc' ? 'DESCENDING' : 'ASCENDING' }];
+          if (opts.limit) structuredQuery.limit = opts.limit;
+
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:runQuery?key=${firebaseConfig.apiKey}`, {
+              method: 'POST', headers: headers, body: JSON.stringify({ structuredQuery })
+          });
+          if (!res.ok) throw new Error('REST Query Error');
+          const rows = await res.json();
+          const results = [];
+          for (const row of rows) {
+              if (!row.document) continue;
+              const parts = row.document.name.split('/');
+              results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
+          }
+          return results;
+      }
+
+      async function restCommit(writes) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`${FS_BASE.replace('/documents', '')}/documents:commit?key=${firebaseConfig.apiKey}`, {
+              method: 'POST', headers: headers, body: JSON.stringify({ writes })
+          });
+          if (!res.ok) throw new Error('REST Commit Error');
+          return res.json();
+      }
+
+      // DOM Elements
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const headerUserName = document.getElementById('header-user-name');
+      const headerProfileImg = document.getElementById('header-profile-img');
+      const sidebarUserName = document.getElementById('sidebar-user-name');
+      const sidebarProfileImg = document.getElementById('sidebar-profile-img');
+      const settingsProfilePreview = document.getElementById('settings-profile-preview');
+      const firstNameInput = document.getElementById('firstName');
+      const lastNameInput = document.getElementById('lastName');
+      const emailInput = document.getElementById('emailInput');
+
+      // Notification Elements
+      const bellBtn = document.getElementById('bell-btn');
+      const notifDropdown = document.getElementById('notif-dropdown');
+      const notifBadge = document.getElementById('notif-badge');
+      const notifList = document.getElementById('notif-list');
+      const dropdownCount = document.getElementById('dropdown-count');
+
+      let currentUser = null;
+      let userData = {};
+      let selectedImageFile = null;
+      let latestNotificationTime = 0;
+      let notifInterval = null;
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                const data = await restGetDoc(`users/${user.uid}`);
+                
+                if (data) {
+                    userData = data;
+                    if (userData.role === 'instructor') { window.location.replace("instructor-settings.html"); return; }
+                    if (userData.role === 'admin') { window.location.replace("admin-dashboard.html"); return; }
+
+                    populateForm(user, userData);
+                    loadNotifications(user.uid);
+                } else {
+                    populateForm(user, {});
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        } else {
+            window.location.replace("login.html");
+        }
+      });
+
+      function populateForm(user, data) {
+          const fullName = data.name || user.displayName || "";
+          const parts = fullName.split(' ');
+          
+          if(firstNameInput) firstNameInput.value = parts[0] || "";
+          if(lastNameInput) lastNameInput.value = parts.slice(1).join(' ') || "";
+          if(emailInput) emailInput.value = user.email;
+          
+          const defaultImg = `https://ui-avatars.com/api/?name=${fullName}&background=6D28D9&color=fff`;
+          const photo = data.profileImage || user.photoURL || defaultImg;
+          
+          if(headerProfileImg) headerProfileImg.src = photo;
+          if(sidebarProfileImg) sidebarProfileImg.src = photo;
+          if(settingsProfilePreview) settingsProfilePreview.src = photo;
+          
+          if(headerUserName) headerUserName.textContent = parts[0] || "طالب";
+          if(sidebarUserName) sidebarUserName.textContent = fullName;
+      }
+
+      async function compressImage(file, { quality = 0.7, maxWidth = 800, maxHeight = 800 } = {}) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth || height > maxHeight) {
+                        if (width > height) {
+                            height = Math.round((height *= maxWidth / width));
+                            width = maxWidth;
+                        } else {
+                            width = Math.round((width *= maxHeight / height));
+                            height = maxHeight;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (!blob) { reject(new Error('فشل ضغط الصورة')); return; }
+                        const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: 'image/jpeg', lastModified: Date.now() });
+                        resolve(newFile);
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+      }
+
+      const fileInput = document.getElementById('file-input');
+      if(fileInput) {
+          fileInput.addEventListener('change', async (e) => {
+              const file = e.target.files[0];
+              if(file) {
+                  const uploadBtn = document.querySelector('.btn-ios'); 
+                  const originalText = uploadBtn.innerText;
+                  uploadBtn.innerText = "جاري المعالجة...";
+                  
+                  try {
+                      const compressedFile = await compressImage(file, { quality: 0.7, maxWidth: 800, maxHeight: 800 });
+                      selectedImageFile = compressedFile; 
+                      settingsProfilePreview.src = URL.createObjectURL(compressedFile);
+                  } catch (error) {
+                      console.error("Compression error:", error);
+                      showNotification("حدث خطأ أثناء معالجة الصورة", "error");
+                  } finally {
+                      uploadBtn.innerText = originalText;
+                  }
+              }
+          });
+      }
+
+      const profileForm = document.getElementById('profile-form');
+      const saveBtn = document.getElementById('save-btn');
+      const currentPasswordInput = document.getElementById('currentPassword');
+      const newPasswordInput = document.getElementById('newPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+
+      if(profileForm) {
+          profileForm.addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const originalText = saveBtn.innerText;
+              saveBtn.innerText = "جاري الحفظ...";
+              saveBtn.disabled = true;
+
+              try {
+                  let newPhotoURL = null;
+                  if(selectedImageFile) {
+                      const storageRef = ref(storage, `users/${currentUser.uid}/profile.jpg`);
+                      await uploadBytes(storageRef, selectedImageFile);
+                      newPhotoURL = await getDownloadURL(storageRef);
+                  }
+
+                  const currentPass = currentPasswordInput.value;
+                  const newPass = newPasswordInput.value;
+                  const confirmPass = confirmPasswordInput.value;
+
+                  if (newPass || confirmPass) {
+                      if(!currentPass) throw new Error("يجب إدخال كلمة المرور الحالية لتغييرها");
+                      if(newPass !== confirmPass) throw new Error("كلمة المرور الجديدة غير متطابقة");
+                      if(newPass.length < 6) throw new Error("كلمة المرور ضعيفة جداً");
+                      
+                      const credential = EmailAuthProvider.credential(currentUser.email, currentPass);
+                      await reauthenticateWithCredential(currentUser, credential);
+                      await updatePassword(currentUser, newPass);
+                      
+                      currentPasswordInput.value = '';
+                      newPasswordInput.value = '';
+                      confirmPasswordInput.value = '';
+                  }
+
+                  const newName = `${firstNameInput.value.trim()} ${lastNameInput.value.trim()}`;
+                  const updateData = {};
+                  
+                  if(newName !== (userData.name || currentUser.displayName)) {
+                      await updateProfile(currentUser, { displayName: newName });
+                      updateData.name = newName;
+                  }
+                  if(newPhotoURL) {
+                      await updateProfile(currentUser, { photoURL: newPhotoURL });
+                      updateData.profileImage = newPhotoURL;
+                  }
+
+                  const updateMaskPaths = Object.keys(updateData);
+                  if(updateMaskPaths.length > 0) {
+                      const write = {
+                          update: { 
+                              name: `projects/${firebaseConfig.projectId}/databases/(default)/documents/users/${currentUser.uid}`, 
+                              fields: jsToFirestoreFields(updateData) 
+                          },
+                          updateMask: { fieldPaths: updateMaskPaths }
+                      };
+                      await restCommit([write]);
+                  }
+
+                  showNotification("تم تحديث البيانات بنجاح!", "success");
+                  if(headerUserName) headerUserName.textContent = firstNameInput.value;
+                  if(sidebarUserName) sidebarUserName.textContent = newName;
+                  if(newPhotoURL) {
+                      headerProfileImg.src = newPhotoURL;
+                      sidebarProfileImg.src = newPhotoURL;
+                  }
+
+              } catch (error) {
+                  console.error(error);
+                  let msg = "حدث خطأ";
+                  if(error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') msg = "كلمة المرور الحالية غير صحيحة";
+                  else if(error.message) msg = error.message;
+                  showNotification(msg, "error");
+              } finally {
+                  saveBtn.innerText = originalText;
+                  saveBtn.disabled = false;
+              }
+          });
+      }
+
+      // --- كود منطقة الحذف المحدث والآمن ---
+      const btnInitDelete = document.getElementById('btn-init-delete');
+      const deleteInitSection = document.getElementById('delete-init-section');
+      const deleteConfirmSection = document.getElementById('delete-confirm-section');
+      const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+      const btnCancelDelete = document.getElementById('btn-cancel-delete');
+      const deleteTimerSpan = document.getElementById('delete-timer-span');
+      const deleteConfirmPassword = document.getElementById('deleteConfirmPassword');
+      let countdownInterval;
+
+      if(btnInitDelete) {
+          btnInitDelete.addEventListener('click', () => {
+              deleteInitSection.style.display = 'none';
+              deleteConfirmSection.style.display = 'block';
+              
+              let timeLeft = 10;
+              deleteTimerSpan.textContent = timeLeft;
+              
+              btnConfirmDelete.disabled = true;
+              btnConfirmDelete.style.backgroundColor = '#ccc';
+              btnConfirmDelete.style.cursor = 'not-allowed';
+
+              countdownInterval = setInterval(() => {
+                  timeLeft--;
+                  deleteTimerSpan.textContent = timeLeft;
+                  
+                  if (timeLeft <= 0) {
+                      clearInterval(countdownInterval);
+                      btnConfirmDelete.disabled = false;
+                      btnConfirmDelete.style.backgroundColor = '#e74c3c';
+                      btnConfirmDelete.style.cursor = 'pointer';
+                  }
+              }, 1000);
+          });
+      }
+
+      if(btnCancelDelete) {
+          btnCancelDelete.addEventListener('click', () => {
+              clearInterval(countdownInterval);
+              deleteConfirmSection.style.display = 'none';
+              deleteInitSection.style.display = 'block';
+              deleteConfirmPassword.value = ''; 
+          });
+      }
+
+      if(btnConfirmDelete) {
+          btnConfirmDelete.addEventListener('click', async () => {
+              if(!currentUser) return;
+              
+              const pass = deleteConfirmPassword.value;
+              if(!pass) {
+                  showNotification("يرجى إدخال كلمة المرور أولاً لتأكيد هويتك", "error");
+                  return;
+              }
+
+              const originalText = btnConfirmDelete.innerHTML;
+              btnConfirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...';
+              btnConfirmDelete.disabled = true;
+
+              try {
+                  const credential = EmailAuthProvider.credential(currentUser.email, pass);
+                  await reauthenticateWithCredential(currentUser, credential);
+
+                  try {
+                      const write = {
+                          delete: `projects/${firebaseConfig.projectId}/databases/(default)/documents/users/${currentUser.uid}`
+                      };
+                      await restCommit([write]);
+                  } catch(firestoreError) {
+                      console.warn("تم منع حذف الملف من قاعدة البيانات، جاري استكمال حذف الحساب...", firestoreError);
+                  }
+
+                  await deleteUser(currentUser);
+                  
+                  showNotification("تم الحذف بنجاح، وداعاً!", "success");
+                  setTimeout(() => {
+                      window.location.replace("login.html");
+                  }, 1500);
+                  
+              } catch (error) {
+                  console.error("Delete Error:", error);
+                  if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                      showNotification("كلمة المرور غير صحيحة", "error");
+                  } else {
+                      showNotification("حدث خطأ أثناء محاولة الحذف", "error");
+                  }
+                  btnConfirmDelete.innerHTML = originalText;
+                  btnConfirmDelete.disabled = false;
+              }
+          });
+      }
+
+      function loadNotifications(uid) {
+          async function fetchNotifs() {
+              try {
+                  const notifications = await restRunQuery("system_notifications", [
+                      { field: "target", op: "IN", value: ["all", "student"] }
+                  ], { orderByField: "createdAt", orderByDir: "desc", limit: 20 });
+
+                  notifList.innerHTML = '';
+                  let unreadCount = 0;
+                  const lastSeenTime = localStorage.getItem(`last_notif_time_${uid}`) || 0;
+
+                  if (notifications.length === 0) {
+                      notifBadge.style.display = 'none';
+                      notifList.innerHTML = '<p style="text-align:center; padding:20px; color:#999; font-size:12px;">لا توجد إشعارات</p>';
+                      return;
+                  }
+
+                  const firstDoc = notifications[0];
+                  if(firstDoc.createdAt) latestNotificationTime = firstDoc.createdAt.seconds;
+
+                  notifications.forEach(n => {
+                      const date = n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : 'الآن';
+                      
+                      const notifTime = n.createdAt ? n.createdAt.seconds : 0;
+                      if (notifTime > lastSeenTime) unreadCount++;
+
+                      let iconClass = 'fa-info'; let colorClass = 'type-info';
+                      if(n.type === 'success') { iconClass = 'fa-check'; colorClass = 'type-success'; }
+                      if(n.type === 'warning') { iconClass = 'fa-exclamation'; colorClass = 'type-warning'; }
+                      if(n.type === 'alert') { iconClass = 'fa-bell'; colorClass = 'type-alert'; }
+
+                      const isUnreadClass = (notifTime > lastSeenTime) ? 'unread' : '';
+
+                      const html = `
+                        <div class="notif-item ${isUnreadClass}">
+                            <div class="notif-icon-box ${colorClass}"><i class="fas ${iconClass}"></i></div>
+                            <div class="notif-content">
+                                <h5>${n.title}</h5>
+                                <p>${n.message}</p>
+                                <span class="notif-time">${date}</span>
+                            </div>
+                        </div>`;
+                      notifList.innerHTML += html;
+                  });
+
+                  if (unreadCount > 0) {
+                      notifBadge.style.display = 'flex';
+                      notifBadge.textContent = unreadCount > 9 ? '+9' : unreadCount;
+                      dropdownCount.textContent = unreadCount + ' جديد';
+                  } else {
+                      notifBadge.style.display = 'none';
+                      dropdownCount.textContent = 'لا يوجد جديد';
+                  }
+              } catch (e) { console.error("Notif Error:", e); }
+          }
+
+          if (notifInterval) clearInterval(notifInterval);
+          fetchNotifs();
+          notifInterval = setInterval(fetchNotifs, 20000);
+      }
+
+      bellBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          notifDropdown.classList.toggle('active');
+          if (notifDropdown.classList.contains('active')) {
+              notifBadge.style.display = 'none';
+              if(currentUser && latestNotificationTime > 0) {
+                  localStorage.setItem(`last_notif_time_${currentUser.uid}`, latestNotificationTime);
+                  dropdownCount.textContent = 'لا يوجد جديد';
+                  setTimeout(() => {
+                      document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+                  }, 2000);
+              }
+          }
+      });
+
+      document.addEventListener('click', (e) => {
+          if (!bellBtn.contains(e.target)) notifDropdown.classList.remove('active');
+      });
+
+      const handleLogout = async (e) => {
+          e.preventDefault();
+          await signOut(auth);
+          window.location.href = "login.html";
+      };
+      if(document.getElementById('logout-btn')) document.getElementById('logout-btn').addEventListener('click', handleLogout);
+      if(document.getElementById('mobile-logout-btn')) document.getElementById('mobile-logout-btn').addEventListener('click', handleLogout);
+
+      function showNotification(message, type = 'error') {
+          const container = document.getElementById('notification-container');
+          const toast = document.createElement('div');
+          toast.className = `custom-toast ${type}`;
+          toast.style.cssText = `
+            background: white; border-left: 4px solid ${type === 'success' ? '#10b981' : '#e74c3c'};
+            padding: 15px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex; align-items: center; gap: 10px; font-family: 'Tajawal'; font-weight: bold; font-size: 14px;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          `;
+          const iconColor = type === 'success' ? '#10b981' : '#e74c3c';
+          toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}" style="color:${iconColor}; font-size:18px;"></i><span style="color:#333;">${message}</span>`;
+          container.appendChild(toast);
+          setTimeout(() => {
+              toast.style.animation = 'fadeOutUp 0.4s ease forwards';
+              setTimeout(() => toast.remove(), 400);
+          }, 4000);
+      }
+    </script>
+    <style>
+        @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+    </style>
+</body>
+</html>

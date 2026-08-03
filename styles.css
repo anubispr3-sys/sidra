@@ -1,0 +1,1835 @@
+/* ================== Global Styles & Variables ================== */
+:root {
+    --primary-color: #6D28D9;
+    --primary-hover: #5B21B6;
+    --secondary-color: #F3F4F6;
+    --text-dark: #111827;
+    --text-light: #6B7280;
+    --background-color: #FFFFFF;
+    --border-color: #E5E7EB;
+    /* إضافة خطوط أبل الرسمية قبل خط تجوال لإعطاء إحساس الـ Native iOS */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Tajawal', "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* ظلال أنعم وأكثر تشتتاً تناسب مدرسة أبل التصميمية */
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+    /* زوايا دائرية أكبر قليلاً تتماشى مع الـ Flat Design الحديث لـ iOS */
+    --border-radius: 16px; 
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family);
+    direction: rtl;
+    background-color: var(--background-color);
+    color: var(--text-dark);
+    
+    /* ======== إضافات تطبيق الهاتف (Capacitor) ======== */
+    /* 1. دعم النوتش (Safe Area) للأيفون والأندرويد الحديث */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    
+    /* 2. منع تحديد النصوص لإعطاء إحساس التطبيق الأصلي */
+    -webkit-user-select: none;
+    user-select: none;
+    
+    /* 3. منع ظهور مربع الوميض (Highlight) عند الضغط على أي زر أو رابط */
+    -webkit-tap-highlight-color: transparent;
+    
+    /* 4. منع ظهور قائمة السياق (Context Menu) عند الضغط المطول (اختياري لكن مفضل للتطبيقات) */
+    -webkit-touch-callout: none;
+}
+
+/* السماح بتحديد النصوص وكتابتها فقط داخل حقول الإدخال */
+input, textarea {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
+/* ================================================================ */
+/* =========== إخفاء عناصر الشراء والأسعار (متطلبات أبل) ============ */
+/* ================================================================ */
+/* استخدم هذا الكلاس على أي زر شراء، تفاصيل تسعير، أو جملة تدل على الدفع */
+.ios-hidden {
+    display: none !important;
+}
+
+/* ================== Header ================== */
+.main-header {
+    background-color: var(--background-color);
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: box-shadow 0.3s ease;
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--primary-color);
+    text-decoration: none;
+    letter-spacing: -0.5px; /* لمسة جمالية في عناوين iOS */
+}
+
+.main-nav a {
+    margin: 0 20px;
+    text-decoration: none;
+    color: var(--text-light);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-color);
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease; /* تسريع الحركة لتناسب الموبايل */
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-color);
+}
+
+/* ================== Hero Section ================== */
+.hero-section {
+    background-color: #111827;
+    background-image: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.8)), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 120px 0;
+}
+
+.hero-title {
+    font-size: 52px;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+    letter-spacing: -1px; /* Large titles in iOS usually have tighter tracking */
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    margin-bottom: 2.5rem;
+    max-width: 60rem;
+    margin-left: auto;
+    margin-right: auto;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.search-bar-wrapper {
+    display: flex;
+    max-width: 600px;
+    margin: auto;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 18px 25px;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    font-family: var(--font-family);
+}
+
+.search-button {
+    padding: 0 25px;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.search-results-popup {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: right;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.results-category {
+    padding: 15px 20px;
+}
+
+.results-category:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.results-category h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.results-category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.results-category li a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 0 -10px;
+    color: var(--text-dark);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.results-category li a:hover {
+    background-color: var(--secondary-color);
+}
+
+.results-category li a span {
+    margin-left: 15px;
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+}
+
+/* ================== Stats Section ================== */
+.stats-section {
+    background-color: var(--secondary-color);
+    padding: 60px 0;
+}
+
+.stats-section .container {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    color: var(--text-dark);
+    min-width: 180px;
+    padding: 20px;
+}
+
+.stat-icon {
+    font-size: 36px;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 16px;
+    color: var(--text-light);
+}
+
+/* ================== Featured Courses Section ================== */
+.featured-courses {
+    padding: 100px 0;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.course-card {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05); /* إطار أنعم لتناسب ستايل iOS */
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-3px); /* حركة أخف */
+}
+
+.course-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.course-content {
+    padding: 25px;
+}
+
+.course-category {
+    display: inline-block;
+    padding: 6px 14px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+}
+
+.course-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    line-height: 1.4;
+    color: var(--text-dark);
+}
+
+.course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-light);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.course-meta .fa-star {
+    color: #FBBF24;
+}
+
+.course-price {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.course-price.free {
+    color: #10B981;
+}
+
+/* ================== Features Section ================== */
+.features-section {
+    padding: 100px 0;
+    background-color: var(--secondary-color);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    text-align: center;
+}
+
+.feature-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 25px auto;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%; /* شكل دائري يحافظ على انسيابية iOS */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+.feature-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.feature-description {
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+/* ================== Instructors Section ================== */
+.instructors-section {
+    padding: 100px 0;
+}
+
+.instructors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    text-align: center;
+}
+
+.instructor-card {
+    padding: 20px;
+}
+
+.instructor-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 4px solid var(--secondary-color); /* تخفيف الإطار ليكون أنعم */
+    box-shadow: var(--shadow);
+}
+
+.instructor-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.instructor-title {
+    color: var(--text-light);
+    font-size: 15px;
+}
+
+/* ================== Footer ================== */
+.main-footer {
+    background-color: #000000; /* تعميق لون الفوتر ليتماشى مع التباين العالي لأبل */
+    color: rgba(255, 255, 255, 0.7);
+    padding: 80px 0 0 0;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.footer-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-col li a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 10px;
+    transition: color 0.3s ease;
+}
+
+.footer-col li a:hover {
+    color: white;
+}
+
+.social-links a {
+    color: white;
+    font-size: 22px;
+    margin-left: 15px;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding: 25px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ================================================================ */
+/* =========== Styles for All Courses Page ======================== */
+/* ================================================================ */
+
+.page-title-bar {
+    background-color: var(--secondary-color);
+    padding: 40px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-title-bar h1 {
+    font-size: 34px; /* تكبير العنوان لأسلوب الـ Large Title */
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.5px;
+}
+
+.breadcrumbs a {
+    color: var(--text-light);
+    text-decoration: none;
+}
+
+.breadcrumbs span {
+    color: var(--text-light);
+    margin: 0 5px;
+}
+
+.breadcrumbs a:hover {
+    color: var(--primary-color);
+}
+
+.page-content-area .container {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.filters-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: var(--background-color);
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow); /* إضافة ظل خفيف للسايدبار */
+}
+
+.filter-group {
+    padding-bottom: 25px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-group:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.filter-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+}
+
+.filter-search-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px; /* أنعم في iOS */
+    box-sizing: border-box;
+    background-color: var(--secondary-color);
+    font-family: var(--font-family);
+}
+
+.filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.filter-list li {
+    margin-bottom: 15px;
+}
+
+.filter-list label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    padding-right: 30px;
+}
+
+.filter-list input[type="checkbox"],
+.filter-list input[type="radio"] {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.filter-list label::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--secondary-color);
+    transition: all 0.2s ease;
+}
+
+.filter-list input[type="radio"]+label>span {
+    display: inline-block;
+}
+
+.filter-list input[type="radio"]+label::before {
+    border-radius: 50%;
+}
+
+.filter-list input:checked+label::before {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.filter-list label::after {
+    content: '';
+    position: absolute;
+    right: 7px;
+    top: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.filter-list input[type="radio"]:checked+label::after {
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 50%;
+    border: none;
+    right: 5px;
+    top: 7px;
+}
+
+.filter-list input:checked+label::after {
+    opacity: 1;
+}
+
+.filter-apply-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+}
+
+.courses-main-content {
+    flex-grow: 1;
+}
+
+.sort-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 30px;
+    color: var(--text-light);
+    box-shadow: var(--shadow);
+}
+
+.sort-dropdown {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: white;
+    font-family: var(--font-family);
+    font-weight: 500;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.page-number,
+.page-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin: 0 5px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.page-number.active,
+.page-number:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.mobile-filter-trigger {
+    display: none;
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.mobile-filter-trigger .fa-filter {
+    margin-left: 10px;
+}
+
+/* ================== Mobile & Responsive Styles ================== */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-dark);
+    cursor: pointer;
+}
+
+.mobile-nav {
+    display: none;
+    flex-direction: column;
+    background-color: white;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.mobile-nav a {
+    padding: 15px 0;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-nav a:last-of-type {
+    border-bottom: none;
+}
+
+.mobile-nav .btn-primary {
+    margin-top: 15px;
+}
+
+@media (max-width: 992px) {
+    .main-nav,
+    .header-actions {
+        display: none;
+    }
+    .mobile-menu-toggle {
+        display: block;
+    }
+    .hero-title {
+        font-size: 40px;
+    }
+    .page-content-area .container {
+        flex-direction: column;
+    }
+    .filters-sidebar {
+        display: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .filters-sidebar.active {
+        display: block;
+    }
+    .courses-main-content {
+        width: 100%;
+    }
+    .mobile-filter-trigger {
+        display: block;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 32px;
+    }
+    .hero-subtitle {
+        font-size: 16px;
+    }
+    .section-title {
+        font-size: 28px;
+    }
+}
+
+/* ================================================================ */
+/* ============= Styles for Course Details Page =================== */
+/* ================================================================ */
+
+.course-title-bar {
+    background-color: #000000;
+    color: white;
+    padding: 50px 0;
+}
+
+.course-title-bar .breadcrumbs a,
+.course-title-bar .breadcrumbs span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.course-title-bar .breadcrumbs a:hover {
+    color: white;
+}
+
+.course-title-bar h1 {
+    font-size: 38px;
+    margin: 10px 0;
+    letter-spacing: -0.5px;
+}
+
+.course-title-bar .course-short-description {
+    font-size: 18px;
+    max-width: 700px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+}
+
+.course-meta-info {
+    margin-top: 20px;
+    display: flex;
+    gap: 25px;
+    font-size: 14px;
+}
+
+.course-meta-info .fa-star {
+    color: #FBBF24;
+}
+
+.course-meta-info a {
+    color: white;
+    text-decoration: underline;
+}
+
+.course-details-main {
+    flex-grow: 1;
+}
+
+.learning-box {
+    border: 1px solid var(--border-color);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    background-color: var(--background-color);
+    box-shadow: var(--shadow);
+}
+
+.learning-box h2 {
+    margin: 0 0 20px 0;
+}
+
+.learning-box ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.learning-box li {
+    display: flex;
+    align-items: flex-start;
+}
+
+.learning-box .fa-check {
+    color: var(--primary-color);
+    margin-left: 10px;
+    margin-top: 5px;
+}
+
+.curriculum-section h2 {
+    margin-bottom: 20px;
+}
+
+.curriculum-module {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    background-color: var(--background-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02); /* لمسة خفيفة لفصل الموديولات */
+}
+
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--secondary-color);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.module-header .fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.curriculum-module.active .module-header .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.module-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+.curriculum-module.active .module-content {
+    max-height: 1000px;
+    opacity: 1;
+}
+.lesson-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.lesson-item i {
+    color: var(--text-light);
+    margin-left: 15px;
+    width: 20px;
+}
+
+.lesson-item a {
+    margin-right: auto;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.instructor-bio-section {
+    margin-top: 50px;
+}
+
+.instructor-bio-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.instructor-bio-box img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.instructor-info h3 {
+    margin: 0 0 5px 0;
+}
+
+.instructor-info p {
+    margin: 0;
+    color: var(--text-light);
+}
+
+.purchase-sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 120px;
+}
+
+.purchase-card {
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.video-preview {
+    display: block;
+    position: relative;
+    text-align: center;
+}
+
+.video-preview img {
+    width: 100%;
+    /* تفعيل الزوايا الدائرية العلوية فقط لتتناسب مع الكارت */
+    border-radius: calc(var(--border-radius) - 1px) calc(var(--border-radius) - 1px) 0 0;
+}
+
+.video-preview .fa-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    color: white;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); /* ظل للـ play button */
+}
+
+.video-preview span {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.price-info {
+    padding: 25px;
+    text-align: right;
+}
+
+.current-price {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.original-price {
+    font-size: 18px;
+    color: var(--text-light);
+    text-decoration: line-through;
+    margin-right: 10px;
+}
+
+.btn-fullwidth {
+    width: calc(100% - 50px);
+    margin: 0 25px;
+    padding: 15px;
+    font-size: 16px;
+}
+
+.course-features-list {
+    padding: 25px;
+}
+
+.course-features-list h4 {
+    margin: 0 0 15px 0;
+}
+
+.course-features-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: var(--text-light);
+}
+
+.course-features-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.course-features-list i {
+    margin-left: 10px;
+    width: 20px;
+    color: var(--text-dark);
+}
+
+/* ================== Mobile Responsive (Course Details) ================== */
+@media (max-width: 992px) {
+    .course-details-main {
+        order: 2;
+    }
+    .purchase-sidebar {
+        order: 1;
+        position: static;
+        width: 100%;
+        margin-bottom: 40px;
+    }
+    .learning-box ul {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ================================================================ */
+/* =========== Styles for Lesson Player Page ====================== */
+/* ================================================================ */
+
+body.lesson-player-page {
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.lesson-header {
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 0;
+    flex-shrink: 0;
+    /* دعم النوتش العلوي أثناء تشغيل الفيديو */
+    padding-top: env(safe-area-inset-top);
+}
+
+.lesson-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.back-to-course {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.back-to-course:hover {
+    color: var(--primary-color);
+}
+
+.back-to-course i {
+    margin-left: 8px;
+}
+
+.lesson-title-header {
+    text-align: center;
+    color: var(--text-light);
+}
+
+.lesson-title-header h3,
+.lesson-title-header p {
+    display: inline-block;
+    margin: 0 5px;
+}
+
+.lesson-title-header h3 {
+    color: var(--text-dark);
+}
+
+.lesson-player-container {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.video-main-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.video-player-wrapper {
+    width: 100%;
+    background-color: #000;
+    margin-bottom: 30px;
+    border-radius: var(--border-radius);
+    overflow: hidden; /* لمنع خروج زوايا الفيديو الحادة */
+}
+
+.video-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.video-placeholder i {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.tab-buttons {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 25px;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-light);
+    position: relative;
+    font-family: var(--font-family);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--primary-color);
+    border-radius: 3px 3px 0 0; /* زوايا ناعمة للخط النشط */
+}
+
+.tab-content {
+    display: none;
+    line-height: 1.8;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.tab-content ul li a {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.tab-content textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-family: var(--font-family);
+    box-sizing: border-box;
+    background-color: var(--secondary-color);
+}
+
+.curriculum-sidebar {
+    width: 350px;
+    flex-shrink: 0;
+    background-color: var(--background-color);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-bar-container {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 4px;
+}
+
+.curriculum-list {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.curriculum-sidebar .curriculum-module {
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.curriculum-sidebar .module-header {
+    background-color: transparent;
+    padding: 15px 20px;
+}
+
+.curriculum-sidebar .lesson-item {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    border: none;
+    padding: 12px 20px;
+    transition: background-color 0.2s;
+}
+
+.curriculum-sidebar .lesson-item.active {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.curriculum-sidebar .lesson-item:hover {
+    background-color: #f0f1f3;
+}
+
+.curriculum-sidebar .lesson-item.completed i {
+    color: var(--primary-color);
+}
+/* ================================================================ */
+/* =========== Mobile Styles for Lesson Player ==================== */
+/* ================================================================ */
+
+.mobile-curriculum-toggle {
+    display: none;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-family: var(--font-family);
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.mobile-curriculum-toggle i {
+    margin-left: 5px;
+}
+
+.close-sidebar-btn {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: var(--text-dark);
+}
+
+@media (max-width: 992px) {
+    .lesson-header .lesson-title-header p,
+    .lesson-header .lesson-nav-buttons {
+        display: none;
+    }
+    .mobile-curriculum-toggle {
+        display: block;
+    }
+    .lesson-header .container {
+        justify-content: space-between;
+    }
+    .lesson-player-container {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    .video-main-content {
+        width: 100%;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    .curriculum-sidebar {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 320px;
+        max-width: 90%;
+        height: 100vh;
+        z-index: 1001;
+        transition: right 0.3s ease-in-out;
+        border-right: none;
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1); /* ظل أعمق للقائمة الجانبية */
+    }
+    .curriculum-sidebar.active {
+        right: 0;
+    }
+    .close-sidebar-btn {
+        display: block;
+    }
+}
+/* ================================================================ */
+/* =========== Styles for Auth Pages (Register/Login) ============= */
+/* ================================================================ */
+
+.auth-section {
+    padding: 80px 0;
+    background-color: var(--secondary-color);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+}
+
+.auth-form-container {
+    max-width: 500px;
+    margin: auto;
+    background-color: var(--background-color);
+    padding: 40px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.auth-form-container h2 {
+    margin: 0 0 10px 0;
+    font-size: 30px;
+    letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+    margin: 0 0 30px 0;
+    color: var(--text-light);
+}
+
+.auth-form {
+    text-align: right;
+}
+
+/* --- زر تبديل نوع المستخدم --- */
+.user-type-toggle {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+.user-type-toggle input[type="radio"] {
+    display: none;
+}
+.user-type-toggle .user-type-label {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+.user-type-toggle .user-type-label.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+.user-type-toggle .user-type-label i {
+    margin-left: 8px;
+}
+
+
+/* --- حقول الإدخال --- */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 14px 15px; /* تكبير البادنج ليكون مريح للإصبع (Touch Target) */
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-family: var(--font-family);
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1); /* تأثير Focus يشبه أبل */
+}
+.form-group.terms {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+.form-group.terms input[type="checkbox"] {
+    width: 18px; /* تكبير التشيك بوكس للأجهزة المحمولة */
+    height: 18px;
+    margin-left: 10px;
+    accent-color: var(--primary-color);
+}
+.form-group.terms a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.auth-form .btn-fullwidth {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.auth-switch {
+    margin-top: 25px;
+    font-size: 15px;
+}
+.auth-switch a {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* ================================================================ */
+/* =========== Styles for About Us Page ============================ */
+/* ================================================================ */
+
+.about-hero-section-v2 {
+    padding: 100px 0;
+    background-image: linear-gradient(rgba(17, 24, 39, 0.85), rgba(17, 24, 39, 0.85)), url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+    color: white;
+}
+.about-hero-section-v2 .hero-text {
+    max-width: 800px;
+    margin: 0 auto;
+}
+.about-hero-section-v2 h1 {
+    font-size: 48px;
+    font-weight: 800;
+    margin-top: 0;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    letter-spacing: -1px;
+}
+.about-hero-section-v2 p {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+}
+
+.alternating-layout-section {
+    padding: 80px 0;
+}
+.alternating-row {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    margin-bottom: 80px;
+}
+.alternating-row:last-child {
+    margin-bottom: 0;
+}
+.alternating-row.reverse {
+    flex-direction: row-reverse;
+}
+.alternating-image {
+    flex-basis: 50%;
+    min-width: 50%;
+}
+.alternating-image img {
+    width: 100%;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+.alternating-text {
+    flex-basis: 50%;
+}
+.alternating-text h3 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 15px;
+    letter-spacing: -0.5px;
+}
+.alternating-text p {
+    font-size: 17px;
+    line-height: 1.9;
+    color: var(--text-light);
+}
+
+.goals-section {
+    padding: 80px 0;
+    background-color: var(--secondary-color);
+}
+.goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+.goal-card {
+    background-color: var(--background-color);
+    padding: 35px 30px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+.goal-card:hover {
+    transform: translateY(-5px); /* حركة أخف لـ iOS */
+}
+.goal-icon {
+    font-size: 40px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+.goal-card h4 {
+    font-size: 22px;
+    margin: 0 0 10px 0;
+}
+.goal-card p {
+    color: var(--text-light);
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* --- Mobile Responsive --- */
+@media (max-width: 992px) {
+    .alternating-row,
+    .alternating-row.reverse {
+        flex-direction: column;
+        gap: 30px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .about-hero-section-v2 h1 {
+        font-size: 36px;
+    }
+}
+/* =========================================
+   إضافة: تنسيقات الإشعارات (Notifications)
+   ========================================= */
+#notification-container {
+    position: fixed;
+    top: calc(20px + env(safe-area-inset-top)); /* مراعاة النوتش للإشعارات */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 90%;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.custom-toast {
+    background: #fff;
+    color: #333;
+    padding: 16px 20px;
+    border-radius: 12px; /* زوايا ناعمة للإشعارات */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* ظل عائم مثل إشعارات أبل */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 14px;
+    animation: slideInDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; /* حركة ارتدادية سلسة */
+    border-right: 6px solid #ccc;
+    pointer-events: auto;
+}
+
+/* نجاح */
+.custom-toast.success {
+    border-right-color: #34C759; /* الأخضر الرسمي لـ iOS */
+}
+.custom-toast.success i {
+    color: #34C759;
+    font-size: 18px;
+}
+
+/* خطأ */
+.custom-toast.error {
+    border-right-color: #FF3B30; /* الأحمر الرسمي لـ iOS */
+}
+.custom-toast.error i {
+    color: #FF3B30;
+    font-size: 18px;
+}
+
+/* حركات الأنيميشن */
+@keyframes slideInDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOutUp {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-20px); opacity: 0; }
+}
+
+/* ================================================================ */
+/* =========== إضافات تطبيق الهاتف (Mobile App Overrides) ========= */
+/* ================================================================ */
+
+/* جعل التمرير (Scrolling) سلس جداً مثل تطبيقات الأيفون والأندرويد */
+html {
+    scroll-behavior: smooth;
+}
+
+/* تفعيل التمرير السلس للقوائم الجانبية والمحتوى الطويل (Native Feeling) */
+.curriculum-list, 
+.video-main-content, 
+.mobile-nav,
+body {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* إخفاء شريط التمرير (Scrollbar) في القوائم الجانبية لتبدو كتطبيق */
+.curriculum-list::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+/* تحسين شكل الأزرار عند الضغط عليها (تأثير ضغط بسيط يغني عن الـ hover في الموبايل) */
+.btn:active, 
+.lesson-item:active, 
+.tab-button:active,
+.nav-item:active,
+.goal-card:active,
+.course-card:active {
+    transform: scale(0.97); /* ضغطة ناعمة جداً */
+    transition: transform 0.1s ease-out;
+}
+
+/* ================================================================ */
+/* =========== تنسيقات شريط التنقل السفلي (Bottom Navigation) ======= */
+/* ================================================================ */
+
+.mobile-bottom-nav {
+    display: none; 
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* خلفية شبه شفافة مع تأثير Blur (Glassmorphism) المحبب لأبل */
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
+    z-index: 9999;
+    /* حساب مساحة النوتش السفلي للأيفون */
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.mobile-bottom-nav .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0 8px 0;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600; /* وزن خط أقل سمكاً في التابات السفلية */
+    transition: color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-bottom-nav .nav-item i {
+    font-size: 22px; /* أيقونات أكبر قليلاً */
+    margin-bottom: 4px;
+}
+
+.mobile-bottom-nav .nav-item.active {
+    color: var(--primary-color);
+}
+
+/* التفعيل فقط في شاشات الهواتف */
+@media (max-width: 992px) {
+    .mobile-bottom-nav {
+        display: flex;
+    }
+    
+    /* رفع محتوى الموقع لأعلى قليلاً لكي لا يغطيه الشريط السفلي */
+    body {
+        padding-bottom: calc(75px + env(safe-area-inset-bottom));
+    }
+    
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+}
+
+/* ================================================================ */
+/* =========== تحسينات الهوامش لشاشات الموبايل (Mobile Margins) ==== */
+/* ================================================================ */
+
+@media (max-width: 992px) {
+    .container {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        box-sizing: border-box;
+    }
+
+    .footer-col {
+        padding: 0 10px;
+    }
+
+    .footer-bottom {
+        padding: 25px 20px !important;
+        line-height: 1.6;
+    }
+
+    .main-footer {
+        padding-bottom: 30px;
+    }
+}
+
+/* ================================================================ */
+/* ======== تحسين شكل الهيدر (الإشعارات والصورة) في الموبايل ======== */
+/* ================================================================ */
+@media (max-width: 992px) {
+    #user-menu-btn .fa-chevron-down,
+    #header-user-name {
+        display: none !important;
+    }
+
+    .user-header-profile {
+        gap: 20px !important; 
+    }
+
+    #user-menu-btn img {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50%; /* ضمان استدارة الصورة */
+        border: 2px solid var(--secondary-color);
+        padding: 2px;
+        background-color: white;
+    }
+
+    .user-dropdown {
+        left: 20px !important; /* إبعادها عن حافة الشاشة قليلاً */
+        right: auto !important;
+        top: 65px !important; 
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+        width: 220px; /* عرض ثابت وأصغر قليلاً للموبايل */
+    }
+}
