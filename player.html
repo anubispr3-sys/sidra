@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Secure Player</title>
+    <style>
+        /* إخفاء الهوامش وجعل الشاشة سوداء بالكامل */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+    <script>
+        // كلمة السر الخاصة بتطبيقك (لازم تكون مطابقة للكلمة اللي في التطبيق)
+        const SECRET_TOKEN = "SidraApp_SecureKey_2026_X9PQ";
+
+        // الاستماع للرسائل القادمة من التطبيق
+        window.addEventListener("message", function(event) {
+            const data = event.data;
+
+            // التحقق: هل البيانات موجودة؟ وهل كلمة السر صحيحة؟ وهل يوجد معرف للفيديو؟
+            if (data && data.token === SECRET_TOKEN && data.vid) {
+                // إنشاء مشغل Bunny.net فقط إذا نجح التحقق
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://iframe.mediadelivery.net/embed/549357/${data.vid}?autoplay=false`;
+                iframe.setAttribute('allow', 'autoplay; encrypted-media');
+                iframe.setAttribute('allowfullscreen', 'true');
+                document.body.appendChild(iframe);
+            } else {
+                // محاولة اختراق أو فتح مباشر للرابط (تجاهل أو إظهار شاشة سوداء)
+                console.warn("Unauthorized Access Attempt Blocked.");
+            }
+        });
+    </script>
+</body>
+</html>
