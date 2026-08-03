@@ -252,7 +252,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // التعديل الأول: استيراد initializeAuth وفرض التخزين المحلي browserLocalPersistence
+        import { initializeAuth, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
@@ -265,7 +266,10 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        // التعديل الثاني: الاعتماد على التخزين المحلي لمنع الخروج التلقائي في iOS
+        const auth = initializeAuth(app, {
+            persistence: browserLocalPersistence
+        });
 
         // ================================================================
         // طبقة REST بديلة عن Firestore SDK مع دعم الـ Auth Token

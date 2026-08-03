@@ -324,8 +324,8 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, query, where, limit, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      // التعديل 1: فرض استخدام التخزين المحلي في نظام المصادقة
+      import { initializeAuth, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
       
       const firebaseConfig = {
         apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
@@ -338,17 +338,13 @@
       };
 
       const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      
-      const db = initializeFirestore(app, {
-          localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}),
-          experimentalForceLongPolling: true
+      // التعديل 2: تهيئة الـ Auth بالطريقة التي تمنع تعليق iOS والخروج التلقائي
+      const auth = initializeAuth(app, {
+          persistence: browserLocalPersistence
       });
 
       // ================================================================
-      // طبقة REST بديلة عن Firestore SDK (getDoc/getDocs) لتجنب تعليق
-      // اتصال WebChannel/long-polling جوه بعض WKWebViews (تطبيقات
-      // volt.build/Cordova). كل القراءات بتتم بـ fetch() عادي.
+      // التعديل 3: الاعتماد كلياً على دوال REST API لتجنب تحميل Firestore
       // ================================================================
       function firestoreValueToJs(value) {
           if (!value) return null;
@@ -372,7 +368,20 @@
           if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
           return { stringValue: String(v) };
       }
-      // جلب مستند واحد بمساره الكامل، مثال: restGetDoc('site_settings/hero_section')
+
+      async function getRestHeaders() {
+          const headers = { 'Content-Type': 'application/json' };
+          if (auth.currentUser) {
+              try {
+                  const token = await auth.currentUser.getIdToken();
+                  if (token) {
+                      headers['Authorization'] = `Bearer ${token}`;
+                  }
+              } catch (e) { console.error("Error getting auth token:", e); }
+          }
+          return headers;
+      }
+
       async function restGetDoc(path) {
           const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${path}?key=${firebaseConfig.apiKey}`;
           const res = await fetch(url);
@@ -381,8 +390,7 @@
           const docJson = await res.json();
           return firestoreFieldsToJs(docJson.fields || {});
       }
-      // تنفيذ query بفلاتر AND، مثال:
-      // restRunQuery('courses', [{field:'isFeatured', op:'EQUAL', value:true}], 3)
+      
       async function restRunQuery(collectionId, filters, limitN) {
           const url = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents:runQuery?key=${firebaseConfig.apiKey}`;
           const fieldFilters = (filters || []).map(f => ({
@@ -410,6 +418,15 @@
               results.push({ id: parts[parts.length - 1], ...firestoreFieldsToJs(row.document.fields || {}) });
           }
           return results;
+      }
+
+      async function restCommit(writes) {
+          const headers = await getRestHeaders();
+          const res = await fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents:commit?key=${firebaseConfig.apiKey}`, {
+              method: 'POST', headers: headers, body: JSON.stringify({ writes })
+          });
+          if (!res.ok) throw new Error('REST Commit Error');
+          return res.json();
       }
       // ==============================================================
       // تهيئة إشعارات الموبايل (Capacitor) وحفظ الـ Token
@@ -444,12 +461,19 @@
           initPushNotifications();
       }
 
+      // التعديل 4: استخدام دالة الـ REST بدلاً من مكتبة Firestore لحفظ التوكن
       async function saveTokenIfUserExists() {
           const user = auth.currentUser;
           if (user && cachedFcmToken) {
               try {
-                  const userRef = doc(db, "users", user.uid);
-                  await updateDoc(userRef, { fcmToken: cachedFcmToken });
+                  const write = {
+                      update: { 
+                          name: `projects/${firebaseConfig.projectId}/databases/(default)/documents/users/${user.uid}`, 
+                          fields: { fcmToken: { stringValue: cachedFcmToken } } 
+                      },
+                      updateMask: { fieldPaths: ["fcmToken"] }
+                  };
+                  await restCommit([write]);
                   console.log('تم حفظ توكن الإشعارات بنجاح في قاعدة البيانات!');
                   cachedFcmToken = null; 
               } catch (err) {
@@ -603,7 +627,6 @@
       if(document.getElementById('mobile-logout-btn')) document.getElementById('mobile-logout-btn').addEventListener('click', handleLogout);
 
     </script>
-
 
 </body>
 </html>

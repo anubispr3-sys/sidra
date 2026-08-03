@@ -406,7 +406,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        // التعديل 1: استيراد initializeAuth وفرض استخدام browserLocalPersistence المدعوم في iOS
+        import { initializeAuth, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAE9kk1GbkF6giAH9irh_ERIEHcHFsUpxo",
@@ -419,7 +420,10 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        // التعديل 2: تعريف المصادقة بالتخزين المحلي لمنع تعليق النظام
+        const auth = initializeAuth(app, {
+            persistence: browserLocalPersistence
+        });
 
         // [DEBUG] غيّرها لـ false عشان تقفل صندوق التشخيص
         const DEBUG_MODE = true;
